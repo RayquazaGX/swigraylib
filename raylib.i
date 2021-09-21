@@ -248,8 +248,8 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
     function _wrapper.LoadFontData(fileData, dataSize, fontSize, fontChars, type)
         return _CArrayToLuaTab("CharInfo", _module._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
     end
-    function _wrapper.UnloadFontData(fontDataTab)
-        return _module.UnloadFontData(fontDataTab[1], #fontDataTab)
+    function _wrapper.UnloadFontData(charInfos)
+        return _module.UnloadFontData(charInfos[1], #charInfos)
     end
     function _wrapper.GenImageFontAtlas(chars, fontSize, padding, packMethod)
         local image, recs, charsCount = _module._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
@@ -273,7 +273,7 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
     end
 }
 
-//Define these as int literals, to overcome `enum bool` in raylib.h being unrecognized by SWIG
+//Define these as int literals, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
 #define false 0
 #define true 1
 #define bool int
