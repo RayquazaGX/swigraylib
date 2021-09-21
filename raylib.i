@@ -190,8 +190,17 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
 // Macros and aliases
 //------
 
+#ifdef SWIGLUA
+%define REG_COLOR(colorName)
+    %inline{const Color _SWIGExtra_##colorName = colorName;}
+    %luacode{raylib.colorName = raylib._SWIGExtra_##colorName}
+%enddef
+%define REG_ALIAS(name, value)
+    %luacode{raylib.name = raylib.value}
+%enddef
+#endif
+//memory functions
 %inline %{
-    //Memory functions
     void *_SWIGExtra_RL_MALLOC(size_t size){
         return RL_MALLOC(size);
     };
@@ -204,95 +213,59 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
     void _SWIGExtra_RL_FREE(void *mem){
         return RL_FREE(mem);
     };
-
-    //Colors: undefine them to prevent affected by SWIG
-    #undef LIGHTGRAY
-    #undef GRAY
-    #undef DARKGRAY
-    #undef YELLOW
-    #undef GOLD
-    #undef ORANGE
-    #undef PINK
-    #undef RED
-    #undef MAROON
-    #undef GREEN
-    #undef LIME
-    #undef DARKGREEN
-    #undef SKYBLUE
-    #undef BLUE
-    #undef DARKBLUE
-    #undef PURPLE
-    #undef VIOLET
-    #undef DARKPURPLE
-    #undef BEIGE
-    #undef BROWN
-    #undef DARKBROWN
-    #undef WHITE
-    #undef BLACK
-    #undef BLANK
-    #undef MAGENTA
-    #undef RAYWHITE
-    const Color LIGHTGRAY  = (Color){ 200, 200, 200, 255 };
-    const Color GRAY       = (Color){ 130, 130, 130, 255 };
-    const Color DARKGRAY   = (Color){ 80, 80, 80, 255 };
-    const Color YELLOW     = (Color){ 253, 249, 0, 255 };
-    const Color GOLD       = (Color){ 255, 203, 0, 255 };
-    const Color ORANGE     = (Color){ 255, 161, 0, 255 };
-    const Color PINK       = (Color){ 255, 109, 194, 255 };
-    const Color RED        = (Color){ 230, 41, 55, 255 };
-    const Color MAROON     = (Color){ 190, 33, 55, 255 };
-    const Color GREEN      = (Color){ 0, 228, 48, 255 };
-    const Color LIME       = (Color){ 0, 158, 47, 255 };
-    const Color DARKGREEN  = (Color){ 0, 117, 44, 255 };
-    const Color SKYBLUE    = (Color){ 102, 191, 255, 255 };
-    const Color BLUE       = (Color){ 0, 121, 241, 255 };
-    const Color DARKBLUE   = (Color){ 0, 82, 172, 255 };
-    const Color PURPLE     = (Color){ 200, 122, 255, 255 };
-    const Color VIOLET     = (Color){ 135, 60, 190, 255 };
-    const Color DARKPURPLE = (Color){ 112, 31, 126, 255 };
-    const Color BEIGE      = (Color){ 211, 176, 131, 255 };
-    const Color BROWN      = (Color){ 127, 106, 79, 255 };
-    const Color DARKBROWN  = (Color){ 76, 63, 47, 255 };
-    const Color WHITE      = (Color){ 255, 255, 255, 255 };
-    const Color BLACK      = (Color){ 0, 0, 0, 255 };
-    const Color BLANK      = (Color){ 0, 0, 0, 0 };
-    const Color MAGENTA    = (Color){ 255, 0, 255, 255 };
-    const Color RAYWHITE   = (Color){ 245, 245, 245, 255 };
 %}
-
-//------
-// Aliases
-//------
-#ifdef SWIGLUA
-%define MAKE_ALIAS(name, value)
-    %luacode{raylib.name = raylib.value}
-%enddef
-#endif
+//colors
+REG_COLOR(LIGHTGRAY)
+REG_COLOR(GRAY)
+REG_COLOR(DARKGRAY)
+REG_COLOR(YELLOW)
+REG_COLOR(GOLD)
+REG_COLOR(ORANGE)
+REG_COLOR(PINK)
+REG_COLOR(RED)
+REG_COLOR(MAROON)
+REG_COLOR(GREEN)
+REG_COLOR(LIME)
+REG_COLOR(DARKGREEN)
+REG_COLOR(SKYBLUE)
+REG_COLOR(BLUE)
+REG_COLOR(DARKBLUE)
+REG_COLOR(PURPLE)
+REG_COLOR(VIOLET)
+REG_COLOR(DARKPURPLE)
+REG_COLOR(BEIGE)
+REG_COLOR(BROWN)
+REG_COLOR(DARKBROWN)
+REG_COLOR(WHITE)
+REG_COLOR(BLACK)
+REG_COLOR(BLANK)
+REG_COLOR(MAGENTA)
+REG_COLOR(RAYWHITE)
 //macro and typedef aliases
-MAKE_ALIAS(FormatText, TextFormat)
-MAKE_ALIAS(LoadText, LoadFileText)
-MAKE_ALIAS(GetExtension, GetFileExtension)
-MAKE_ALIAS(GetImageData, LoadImageColors)
-MAKE_ALIAS(FILTER_POINT, TEXTURE_FILTER_POINT)
-MAKE_ALIAS(FILTER_BILINEAR, TEXTURE_FILTER_BILINEAR)
-MAKE_ALIAS(MAP_DIFFUSE, MATERIAL_MAP_DIFFUSE)
-MAKE_ALIAS(PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8)
-MAKE_ALIAS(Quaternion, Vector4)
-MAKE_ALIAS(Texture2D, Texture)
-MAKE_ALIAS(TextureCubemap, Texture)
-MAKE_ALIAS(RenderTexture2D, RenderTexture)
-MAKE_ALIAS(SpriteFont, Font)
-MAKE_ALIAS(Camera, Camera3D)
-MAKE_ALIAS(MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_ALBEDO)
-MAKE_ALIAS(MATERIAL_MAP_SPECULAR, MATERIAL_MAP_METALNESS)
-MAKE_ALIAS(SHADER_LOC_MAP_DIFFUSE, SHADER_LOC_MAP_ALBEDO)
-MAKE_ALIAS(SHADER_LOC_MAP_SPECULAR, SHADER_LOC_MAP_METALNESS)
+REG_ALIAS(FormatText, TextFormat)
+REG_ALIAS(LoadText, LoadFileText)
+REG_ALIAS(GetExtension, GetFileExtension)
+REG_ALIAS(GetImageData, LoadImageColors)
+REG_ALIAS(FILTER_POINT, TEXTURE_FILTER_POINT)
+REG_ALIAS(FILTER_BILINEAR, TEXTURE_FILTER_BILINEAR)
+REG_ALIAS(MAP_DIFFUSE, MATERIAL_MAP_DIFFUSE)
+REG_ALIAS(PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8)
+REG_ALIAS(Quaternion, Vector4)
+REG_ALIAS(Texture2D, Texture)
+REG_ALIAS(TextureCubemap, Texture)
+REG_ALIAS(RenderTexture2D, RenderTexture)
+REG_ALIAS(SpriteFont, Font)
+REG_ALIAS(Camera, Camera3D)
+REG_ALIAS(MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_ALBEDO)
+REG_ALIAS(MATERIAL_MAP_SPECULAR, MATERIAL_MAP_METALNESS)
+REG_ALIAS(SHADER_LOC_MAP_DIFFUSE, SHADER_LOC_MAP_ALBEDO)
+REG_ALIAS(SHADER_LOC_MAP_SPECULAR, SHADER_LOC_MAP_METALNESS)
 //swig extras
-MAKE_ALIAS(RL_MALLOC, _SWIGExtra_RL_MALLOC)
-MAKE_ALIAS(RL_CALLOC, _SWIGExtra_RL_CALLOC)
-MAKE_ALIAS(RL_REALLOC, _SWIGExtra_RL_REALLOC)
-MAKE_ALIAS(RL_FREE, _SWIGExtra_RL_FREE)
-MAKE_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
+REG_ALIAS(RL_MALLOC, _SWIGExtra_RL_MALLOC)
+REG_ALIAS(RL_CALLOC, _SWIGExtra_RL_CALLOC)
+REG_ALIAS(RL_REALLOC, _SWIGExtra_RL_REALLOC)
+REG_ALIAS(RL_FREE, _SWIGExtra_RL_FREE)
+REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
 
 //------
 // Lua wrapper functions
