@@ -214,7 +214,7 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
     };
     char *_SWIGExtra_CodepointToUtf8_WithNullTerm(int codepoint){
         int len;
-        char *utf8 = CodepointToUtf8(codepoint, &len);
+        const char *utf8 = CodepointToUtf8(codepoint, &len);
         char *utf8NullTerm = (char *)malloc((len+1)*sizeof(char));
         memcpy(utf8NullTerm, utf8, len*sizeof(char));
         utf8NullTerm[len] = '\0';
@@ -222,15 +222,13 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
     };
     //raymath.h
     float *_SWIGExtra_MatrixToFloat(Matrix mat){
-        float* f = MatrixToFloat(mat);
         float* copy = (float*)malloc(16*sizeof(float));
-        memcpy(copy, f, 16*sizeof(float));
+        memcpy(copy, MatrixToFloat(mat), 16*sizeof(float));
         return copy;
     };
     float *_SWIGExtra_Vector3ToFloat(Vector3 vec){
-        float* f = Vector3ToFloat(vec);
         float* copy = (float*)malloc(3*sizeof(float));
-        memcpy(copy, f, 3*sizeof(float));
+        memcpy(copy, Vector3ToFloat(vec), 3*sizeof(float));
         return copy;
     };
 %}
