@@ -34,6 +34,7 @@
     #include <raylib.h>
     #include <raymath.h>
     #include <rlgl.h>
+    #include <physac.h>
 %}
 
 //------
@@ -115,6 +116,7 @@
 %array_functions(VertexBuffer, VertexBufferArray)
 %array_functions(DrawCall, DrawCallArray)
 %array_functions(RenderBatch, RenderBatchArray)
+%array_functions(PhysicsBodyData, PhysicsBodyDataArray)
 
 //------
 // Typemap tags
@@ -394,3 +396,4 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 %include "raylib/raylib.h"
 %include "raylib/raymath.h"
 %include "raylib/rlgl.h"
+%include "raylib/physac.h"
