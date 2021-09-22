@@ -33,6 +33,7 @@
 %{
     #include <raylib.h>
     #include <raymath.h>
+    #include <rlgl.h>
 %}
 
 //------
@@ -61,6 +62,8 @@
 %newobject LoadMaterials;
 %newobject LoadWaveSamples;
 %delobject UnloadWaveSamples;
+%newobject rlReadTexturePixels;
+%newobject rlReadScreenPixels;
 
 %newobject _SWIGExtra_CodepointToUtf8_WithNullTerm;
 %newobject _SWIGExtra_MatrixToFloat;
@@ -109,6 +112,9 @@
 %array_functions(AudioStream, AudioStreamArray)
 %array_functions(VrDeviceInfo, VrDeviceInfoArray)
 %array_functions(VrStereoConfig, VrStereoConfigArray)
+%array_functions(VertexBuffer, VertexBufferArray)
+%array_functions(DrawCall, DrawCallArray)
+%array_functions(RenderBatch, RenderBatchArray)
 
 //------
 // Typemap tags
@@ -387,3 +393,4 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 
 %include "raylib/raylib.h"
 %include "raylib/raymath.h"
+%include "raylib/rlgl.h"
