@@ -15,5 +15,5 @@ Would be nicer if this repo can be a collection featuring Ruby/Python/... bindin
 
 ## LICENSE ##
 
-- "raylib.h" is copied from [raylib](https://www.raylib.com/index.html), see the beginning of the file.
+- `raylib/*.h` are copied from [raylib](https://www.raylib.com/index.html), see the beginning of each file.
 - Other part of the repo: MIT

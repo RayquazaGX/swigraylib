@@ -359,4 +359,4 @@ REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
     end
 }
 
-%include "raylib.h"
+%include "raylib/raylib.h"
