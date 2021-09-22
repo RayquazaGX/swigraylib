@@ -22,10 +22,13 @@
 
 %module raylib
 
-//Define these as ints, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
-#define false (int)0
-#define true (int)1
-#define bool int
+// Define bool as _Bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
+#ifndef bool
+    #define __bool_true_false_are_defined   1
+    #define false (_Bool)0
+    #define true (_Bool)1
+    #define bool _Bool
+#endif
 
 %{
     #include <raylib.h>
