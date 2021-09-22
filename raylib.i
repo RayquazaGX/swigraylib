@@ -32,6 +32,7 @@
 
 %{
     #include <raylib.h>
+    #include <raymath.h>
 %}
 
 //------
@@ -62,6 +63,8 @@
 %delobject UnloadWaveSamples;
 
 %newobject _SWIGExtra_CodepointToUtf8_WithNullTerm;
+%newobject _SWIGExtra_MatrixToFloat;
+%newobject _SWIGExtra_Vector3ToFloat;
 
 //------
 // Array type tags
@@ -167,11 +170,28 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
 %clear (Vector3 *points, int pointsCount);
 %clear (Matrix *transforms, int instances);
 
+//raymath.h
+extern void Vector3OrthoNormalize(Vector3 *INOUT, Vector3 *INOUT);
+extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
+
 //------
 // Helper functions
 //------
 
 %inline %{
+    //raylib.h
+    void *_SWIGExtra_RL_MALLOC(size_t size){
+        return RL_MALLOC(size);
+    };
+    void *_SWIGExtra_RL_CALLOC(size_t n, size_t size){
+        return RL_CALLOC(n, size);
+    };
+    void *_SWIGExtra_RL_REALLOC(void *mem, size_t size){
+        return RL_REALLOC(mem, size);
+    };
+    void _SWIGExtra_RL_FREE(void *mem){
+        return RL_FREE(mem);
+    };
     void _SWIGExtra_DrawTexturePoly_ArgRearrange(Texture2D texture, Vector2 center, Vector2 *points, int pointsCount, Vector2 *texcoords, int texcoordsCount, Color tint){
         (void)texcoordsCount;
         return DrawTexturePoly(texture, center, points, texcoords, pointsCount, tint);
@@ -192,6 +212,19 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
         utf8NullTerm[len] = '\0';
         return utf8NullTerm;
     };
+    //raymath.h
+    float *_SWIGExtra_MatrixToFloat(Matrix mat){
+        float* f = MatrixToFloat(mat);
+        float* copy = (float*)malloc(16*sizeof(float));
+        memcpy(copy, f, 16*sizeof(float));
+        return copy;
+    };
+    float *_SWIGExtra_Vector3ToFloat(Vector3 vec){
+        float* f = Vector3ToFloat(vec);
+        float* copy = (float*)malloc(3*sizeof(float));
+        memcpy(copy, f, 3*sizeof(float));
+        return copy;
+    };
 %}
 
 //------
@@ -207,21 +240,6 @@ extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vec
     %luacode{raylib.name = raylib.value}
 %enddef
 #endif
-//memory functions
-%inline %{
-    void *_SWIGExtra_RL_MALLOC(size_t size){
-        return RL_MALLOC(size);
-    };
-    void *_SWIGExtra_RL_CALLOC(size_t n, size_t size){
-        return RL_CALLOC(n, size);
-    };
-    void *_SWIGExtra_RL_REALLOC(void *mem, size_t size){
-        return RL_REALLOC(mem, size);
-    };
-    void _SWIGExtra_RL_FREE(void *mem){
-        return RL_FREE(mem);
-    };
-%}
 //colors
 REG_COLOR(LIGHTGRAY)
 REG_COLOR(GRAY)
@@ -274,6 +292,8 @@ REG_ALIAS(RL_CALLOC, _SWIGExtra_RL_CALLOC)
 REG_ALIAS(RL_REALLOC, _SWIGExtra_RL_REALLOC)
 REG_ALIAS(RL_FREE, _SWIGExtra_RL_FREE)
 REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
+REG_ALIAS(MatrixToFloat, _SWIGExtra_MatrixToFloat)
+REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 
 //------
 // Lua wrapper functions
@@ -357,6 +377,13 @@ REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
     function _wrapper.UnloadModelAnimations(animations)
         return _module.UnloadModelAnimations(animations[1], #animations)
     end
+    function _wrapper.MatrixToFloat(matrix)
+        return _CArrayToLuaTab("float", _module.MatrixToFloat(matrix), 16)
+    end
+    function _wrapper.Vector3ToFloat(vector3)
+        return _CArrayToLuaTab("float", _module.Vector3ToFloat(vector3), 3)
+    end
 }
 
 %include "raylib/raylib.h"
+%include "raylib/raymath.h"
