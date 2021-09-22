@@ -22,6 +22,14 @@
 
 %module raylib
 
+// Define bool as _Bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
+#ifndef bool
+    #define __bool_true_false_are_defined   1
+    #define false (_Bool)0
+    #define true (_Bool)1
+    #define bool _Bool
+#endif
+
 %{
     #include <raylib.h>
 %}
@@ -350,10 +358,5 @@ REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
         return _module.UnloadModelAnimations(animations[1], #animations)
     end
 }
-
-//Define these as int literals, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
-#define false 0
-#define true 1
-#define bool int
 
 %include "raylib.h"
