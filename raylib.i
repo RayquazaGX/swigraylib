@@ -22,12 +22,10 @@
 
 %module raylib
 
-// Define bool as _Bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
+// Define bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
+// c99 already supports bool type, so no need to define it as _Bool
 #ifndef bool
-    #define __bool_true_false_are_defined   1
-    #define false (_Bool)0
-    #define true (_Bool)1
-    #define bool _Bool
+    #define bool bool
 #endif
 
 %{
