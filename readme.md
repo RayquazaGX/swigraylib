@@ -5,7 +5,12 @@
 ## Current Status ##
 
 - SWIG 4.0.2
-- raylib 3.7
+- raylib 3.7.0
+    - `raylib.h`
+    - `raymath.h`
+    - `rlgl.h`
+    - `physac.h`
+    - `easings.h`
 - Supported languages:
     - [x] Lua
 
