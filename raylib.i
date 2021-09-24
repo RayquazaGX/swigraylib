@@ -29,10 +29,12 @@
 #endif
 
 %{
+    #include "raylib/config.h"
     #include <raylib.h>
     #include <raymath.h>
     #include <rlgl.h>
     #include <physac.h>
+    #include "raylib/easings.h"
 %}
 
 //------
@@ -423,7 +425,9 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     end
 }
 
+%include "raylib/config.h"
 %include "raylib/raylib.h"
 %include "raylib/raymath.h"
 %include "raylib/rlgl.h"
 %include "raylib/physac.h"
+%include "raylib/easings.h"
