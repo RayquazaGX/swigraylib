@@ -334,6 +334,40 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
         return tab
     end
 
+    function _wrapper.Vector2(x, y)
+        local vec = _module.Vector2()
+        if x then vec.x, vec.y = x, y end
+        return vec
+    end
+    function _wrapper.Vector3(x, y, z)
+        local vec = _module.Vector3()
+        if x then vec.x, vec.y, vec.z = x, y, z end
+        return vec
+    end
+    function _wrapper.Vector4(x, y, z, w)
+        local vec = _module.Vector4()
+        if x then vec.x, vec.y, vec.z, vec.w = x, y, z, w end
+        return vec
+    end
+    _wrapper.Quaternion = _wrapper.Vector4
+    function _wrapper.Color(r, g, b, a)
+        local col = _module.Color()
+        if r then col.r, col.g, col.b = r, g, b end
+        if a then col.a = a end
+        return col
+    end
+    function _wrapper.Rectangle(x, y, w, h)
+        local rect = _module.Rectangle()
+        if x then rect.x, rect.y = x, y end
+        if w then rect.width, rect.height = w, h end
+        return rect
+    end
+    function _wrapper.BoundingBox(min, max)
+        local box = _module.BoundingBox()
+        if min then box.min, box.max = min, max end
+        return box
+    end
+
     function _wrapper.GetDirectoryFiles(dirPath)
         return _CArrayToLuaTab("charP", _module.GetDirectoryFiles(dirPath))
     end
