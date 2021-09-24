@@ -16,6 +16,8 @@
 
 ## Example ##
 
+### Lua ###
+
 ```lua
 local raylib = require "raylib"
 
