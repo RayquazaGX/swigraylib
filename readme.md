@@ -18,9 +18,27 @@
 
 ### Lua ###
 
-```lua
-local raylib = require "raylib"
+> Example build:
+```sh
+# This example build script requires `xmake` and `swig` installed.
+# `xmake.lua` in this repo is used to build the Lua `.so` module. Should work on Windows as well to build a `.dll`.
+# You can use Lua 5.1~5.4 too, but you need to make changes in the `xmake.lua` accordingly.
+xrepo install "luajit 2.1.0-beta3" && xmake build "swigraylib_lua"
+```
 
+> Print raylib version in the terminal:
+```sh
+# Start luajit to test. You should change path of the output library accordingly.
+luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/libswig?_lua.so'"
+> raylib = require "raylib"
+> print(raylib.RAYLIB_VERSION)
+3.7
+```
+
+> Basic window in Lua:
+```lua
+-- Original version in C: https://github.com/raysan5/raylib/blob/master/examples/core/core_basic_window.c, by Ramon Santamaria (@raysan5)
+local raylib = require "raylib"
 local screenWidth, screenHeight = 800, 450
 raylib.InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window")
 raylib.SetTargetFPS(60)

@@ -1,2 +1,3 @@
 *_wrap.c
 build/
+.xmake/
