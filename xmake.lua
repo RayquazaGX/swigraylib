@@ -4,7 +4,7 @@ add_requires("raylib 3.7.0")
 
 -- Choose one of the Lua versions:
 -- add_requires("lua 5.3", {optional=true})
--- add_requires("lua 5.4, {optional=true}")
+-- add_requires("lua 5.4", {optional=true})
 add_requires("luajit 2.1.0-beta3", {optional=true})
 
 target("swigraylib_lua")
