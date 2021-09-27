@@ -2,6 +2,12 @@
 
 [SWIG](http://www.swig.org/) binding for [raylib](https://www.raylib.com/index.html)
 
+This repo genertates raylib bindings to other languages (eg. Lua), by providing a `raylib.i` SWIG interface file.
+
+> SWIG is a software development tool that connects programs written in C and C++ with a variety of high-level programming languages (C#, Java, Lua, Python, Ruby, ...)
+
+> raylib is a simple and easy-to-use library to enjoy videogames programming.
+
 ## Current Status ##
 
 - SWIG 4.0.2
