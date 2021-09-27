@@ -29,7 +29,7 @@ xrepo install "luajit 2.1.0-beta3" && xmake build "swigraylib_lua"
 > Print raylib version in the terminal:
 ```sh
 # Start luajit to test. You should change path of the output library accordingly.
-luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/libswig?_lua.so'"
+luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swig?_lua.so'"
 > raylib = require "raylib"
 > print(raylib.RAYLIB_VERSION)
 3.7
