@@ -36,5 +36,6 @@ target("swigraylib_lua")
     local swigParams = {"-no-old-metatable-bindings"}
     table.join2(swigParams, raylibDefs)
 
+    add_includedirs(".")
     add_files("raylib.i", {swigflags = swigParams})
     add_cxflags(table.unpack(raylibDefs))
