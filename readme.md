@@ -20,7 +20,7 @@ This repo generates raylib bindings to other languages (eg. Lua), by providing a
 - Supported languages:
     - [x] Lua
 
-## Compiling ##
+## Build ##
 
 This provided build method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) installed.
 
@@ -75,7 +75,7 @@ Would be nicer if this repo can be a collection featuring Ruby/Python/... bindin
 
 ## Credits ##
 
-- Huge thanks to [@waruqi](https://github.com/waruqi) leading the awesome [xmake](https://github.com/xmake-io/xmake) build system which keeps all the messes away from the building process, also gave many advices on the build script in this repo himself.
+- Huge thanks to [@waruqi](https://github.com/waruqi) for presenting the awesome [xmake](https://github.com/xmake-io/xmake) build system which keeps all the messes away from the building process, also for giving many advices on the build script in this repo.
 
 ## LICENSE ##
 
