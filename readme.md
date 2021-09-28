@@ -20,17 +20,19 @@ This repo generates raylib bindings to other languages (eg. Lua), by providing a
 - Supported languages:
     - [x] Lua
 
+## Compiling ##
+
+This provided build method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) installed.
+
+```sh
+xmake update -s dev # SWIG file support currently requires dev branch of xmake. Will not need this line anymore after xmake publishes a release.
+xmake config --menu # Config the project using a terminal ui. You choose a target language and other options in the menu `Project Configuration`.
+xmake               # Build with saved configs.
+```
+
 ## Example ##
 
 ### Lua ###
-
-> Example build:
-```sh
-# This example build script requires `xmake` and `swig` installed.
-# `xmake.lua` in this repo is used to build the Lua `.so` module. Should work on Windows as well to build a `.dll`.
-# You can use Lua 5.1~5.4 too, but you need to make changes in the `xmake.lua` accordingly.
-xrepo install "luajit 2.1.0-beta3" && xmake build "swigraylib_lua"
-```
 
 > Print raylib version in the terminal:
 ```sh
