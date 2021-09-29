@@ -1,5 +1,5 @@
 add_rules("mode.release", "mode.debug")
-set_languages("c99")
+set_languages(is_plat("windows") and "c11" or "c99")
 add_requires("raylib 3.7.0")
 
 option("language")

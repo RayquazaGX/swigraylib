@@ -22,6 +22,9 @@
 
 %module raylib
 
+// Overcome `__stdcall`, `__cdecl` and such.
+%include <windows.i>
+
 // Define bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
 // c99 already supports bool type, so no need to define it as _Bool
 #ifndef bool
@@ -198,11 +201,11 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
         return RL_REALLOC(mem, size);
     };
     void _SWIGExtra_RL_FREE(void *mem){
-        return RL_FREE(mem);
+        RL_FREE(mem);
     };
     void _SWIGExtra_DrawTexturePoly_ArgRearrange(Texture2D texture, Vector2 center, Vector2 *points, int pointsCount, Vector2 *texcoords, int texcoordsCount, Color tint){
         (void)texcoordsCount;
-        return DrawTexturePoly(texture, center, points, texcoords, pointsCount, tint);
+        DrawTexturePoly(texture, center, points, texcoords, pointsCount, tint);
     };
     CharInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount, int type, int *charsCount_out){
         *charsCount_out = charsCount;
@@ -239,7 +242,7 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 
 #ifdef SWIGLUA
 %define REG_COLOR(colorName)
-    %inline{const Color _SWIGExtra_##colorName = colorName;}
+    %constant Color _SWIGExtra_##colorName = colorName;
     %luacode{raylib.colorName = raylib._SWIGExtra_##colorName}
 %enddef
 %define REG_ALIAS(name, value)
