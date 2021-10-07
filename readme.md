@@ -79,6 +79,5 @@ Would be nicer if this repo can be a collection featuring Ruby/Python/... bindin
 
 ## LICENSE ##
 
-- Embedded `raylib/*.h` are copied from [raylib](https://github.com/raysan5/raylib), see the beginning of each file and the original [LICENSE](https://github.com/raysan5/raylib/blob/master/LICENSE) from raylib repo.
 - `examples/resources/` folder has its own `LICENSE` file inside.
 - Other part of the repo: MIT
