@@ -16,6 +16,16 @@ option("lua_flavor")
     set_values("luajit", "lua5.1", "lua5.2", "lua5.3", "lua5.4")
 option_end()
 
+local function getPlatformDefineSymbols()
+    return (
+        is_plat("windows") and {"-D_WIN32"}
+        or is_plat("linux") and {"-D__linux__"}
+        or is_plat("macosx") and {"-D__APPLE__"}
+        or is_plat("android") and {"-D__ANDROID__"}
+        or is_plat("iphoneos") and {"-D__APPLE__", "-DTARGET_OS_IOS"}
+    )
+end
+
 if is_config("language", "lua.*") then
     if is_config("lua_flavor", "luajit.*") then
         add_requires("luajit 2.1.0-beta3")
@@ -65,20 +75,13 @@ target("swigraylib_lua")
     end
 
     local raylibDefs = {"-D_DEFAULT_SOURCE", "-DPLATFORM_DESKTOP", "-DGRAPHICS_API_OPENGL_33", "-DPHYSAC_IMPLEMENTATION"}
-    if is_plat("windows") then
-        raylibDefs[#raylibDefs+1] = "-D_WIN32"
-    elseif is_plat("linux") then
-        raylibDefs[#raylibDefs+1] = "-D__linux__"
-        add_cxflags("-fPIC")
-    elseif is_plat("macosx") then
-        raylibDefs[#raylibDefs+1] = "-D__APPLE__"
-    end
+    local swigflags = {"-no-old-metatable-bindings", "-Iraylib/src"}
+    table.join2(swigflags, raylibDefs)
+    table.join2(swigflags, getPlatformDefineSymbols())
 
-    local swigParams = {"-no-old-metatable-bindings"}
-    table.join2(swigParams, raylibDefs)
+    add_includedirs("raylib/src")
+    add_files("raylib.i", {swigflags = swigflags})
 
-    add_includedirs(".")
-    add_files("raylib.i", {swigflags = swigParams})
     add_cxflags(table.unpack(raylibDefs))
 
 target_end()
