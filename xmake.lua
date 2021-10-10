@@ -1,6 +1,5 @@
 add_rules("mode.release", "mode.debug")
 set_languages(is_plat("windows") and "c11" or "c99")
-add_requires("raylib 3.7.0")
 
 option("language")
     set_showmenu(true)
@@ -28,26 +27,6 @@ option("use_easings")
     set_default(false)
 option_end()
 
-local function getPlatformSymbols()
-    if is_plat("windows") then
-        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D_WIN32"}}
-    elseif is_plat("linux") then
-        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP", "-D_DEFAULT_SOURCE"}, swig={"-D__linux__"}}
-    elseif is_plat("bsd") then  -- Untested
-        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__FreeBSD__"}}
-    elseif is_plat("macosx") then -- Untested
-        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__APPLE__"}}
-    elseif is_plat("android") then -- Untested
-        return {raylib={"-DPLATFORM=PLATFORM_ANDROID"}, swig={"-D__ANDROID__"}}
-    elseif is_plat("iphoneos") then -- Untested
-        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__APPLE__", "-DTARGET_OS_IOS"}}
-    elseif is_plat("wasm") then -- Untested
-        return {raylib={"-DPLATFORM=PLATFORM_WEB"}, swig={"-D__EMSCRIPTEN__"}}
-    else
-        return {raylib={}, swig={}}
-    end
-end
-
 if is_config("language", "lua.*") then
     if is_config("lua_flavor", "luajit.*") then
         add_requires("luajit 2.1.0-beta3")
@@ -60,6 +39,50 @@ if is_config("language", "lua.*") then
     elseif is_config("lua_flavor", "lua5%.4.*") then
         add_requires("lua 5.4")
     end
+end
+
+local platformAddDeps
+local platformSymbols
+if is_plat("windows") then
+    add_requires("glfw")
+    platformAddDeps = function()
+        add_packages("glfw")
+        add_syslinks("gdi32", "user32", "winmm", "shell32")
+    end
+    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D_WIN32"}}
+elseif is_plat("linux") then
+    add_requires("glfw")
+    platformAddDeps = function()
+        add_packages("glfw")
+        add_syslinks("pthread", "dl", "m")
+    end
+    platformSymbols = {raylib={"-DPLATFORM_DESKTOP", "-D_DEFAULT_SOURCE"}, swig={"-D__linux__"}}
+elseif is_plat("bsd") then  -- Untested
+    add_requires("glfw")
+    platformAddDeps = function()
+        add_packages("glfw")
+        add_syslinks("pthread", "dl", "m")
+    end
+    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__FreeBSD__"}}
+elseif is_plat("macosx") then -- Untested
+    add_requires("glfw")
+    platformAddDeps = function()
+        add_packages("glfw")
+        add_frameworks("CoreVideo", "CoreGraphics", "AppKit", "IOKit", "CoreFoundation", "Foundation")
+    end
+    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__APPLE__"}}
+elseif is_plat("android") then -- Untested
+    platformAddDeps = nil
+    platformSymbols = {raylib={"-DPLATFORM_ANDROID"}, swig={"-D__ANDROID__"}}
+elseif is_plat("iphoneos") then -- Untested
+    platformAddDeps = nil
+    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__APPLE__", "-DTARGET_OS_IOS"}}
+elseif is_plat("wasm") then -- Untested
+    platformAddDeps = nil
+    platformSymbols = {raylib={"-DPLATFORM_WEB"}, swig={"-D__EMSCRIPTEN__"}}
+else
+    platformAddDeps = nil
+    platformSymbols = {raylib={}, swig={}}
 end
 
 target("swigraylib")
@@ -83,14 +106,14 @@ target("swigraylib_lua")
     set_default(false)
 
     add_rules("swig.c", {moduletype = "lua"})
-    add_packages("raylib")
+
     if is_config("lua_flavor", "luajit.*") then
         add_packages("luajit")
     elseif is_config("lua_flavor", "lua.*") then
         add_packages("lua")
     end
 
-    local platformSymbols = getPlatformSymbols()
+    if platformAddDeps then platformAddDeps() end
     local raylibDefs = {"-DPHYSAC_IMPLEMENTATION"}
     table.join2(raylibDefs, platformSymbols.raylib)
     local swigflags = {"-no-old-metatable-bindings", "-Iraylib/src"}
@@ -104,6 +127,7 @@ target("swigraylib_lua")
     end
 
     add_includedirs("raylib/src")
+    add_files("raylib/src/*.c")
     add_files("raylib.i", {swigflags = swigflags})
 
     add_cxflags(table.unpack(raylibDefs))
