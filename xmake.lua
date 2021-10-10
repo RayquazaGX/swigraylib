@@ -4,7 +4,7 @@ add_requires("raylib 3.7.0")
 
 option("language")
     set_showmenu(true)
-    set_category("target_binding_language")
+    set_category("swig_options/target_binding_language")
     set_default("lua")
     set_values("lua")
 option_end()
@@ -16,14 +16,36 @@ option("lua_flavor")
     set_values("luajit", "lua5.1", "lua5.2", "lua5.3", "lua5.4")
 option_end()
 
-local function getPlatformDefineSymbols()
-    return (
-        is_plat("windows") and {"-D_WIN32"}
-        or is_plat("linux") and {"-D__linux__"}
-        or is_plat("macosx") and {"-D__APPLE__"}
-        or is_plat("android") and {"-D__ANDROID__"}
-        or is_plat("iphoneos") and {"-D__APPLE__", "-DTARGET_OS_IOS"}
-    )
+option("use_physac")
+    set_showmenu(true)
+    set_category("raylib_options/use_physac")
+    set_default(false)
+option_end()
+
+option("use_easings")
+    set_showmenu(true)
+    set_category("raylib_options/use_easings")
+    set_default(false)
+option_end()
+
+local function getPlatformSymbols()
+    if is_plat("windows") then
+        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D_WIN32"}}
+    elseif is_plat("linux") then
+        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP", "-D_DEFAULT_SOURCE"}, swig={"-D__linux__"}}
+    elseif is_plat("bsd") then  -- Untested
+        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__FreeBSD__"}}
+    elseif is_plat("macosx") then -- Untested
+        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__APPLE__"}}
+    elseif is_plat("android") then -- Untested
+        return {raylib={"-DPLATFORM=PLATFORM_ANDROID"}, swig={"-D__ANDROID__"}}
+    elseif is_plat("iphoneos") then -- Untested
+        return {raylib={"-DPLATFORM=PLATFORM_DESKTOP"}, swig={"-D__APPLE__", "-DTARGET_OS_IOS"}}
+    elseif is_plat("wasm") then -- Untested
+        return {raylib={"-DPLATFORM=PLATFORM_WEB"}, swig={"-D__EMSCRIPTEN__"}}
+    else
+        return {raylib={}, swig={}}
+    end
 end
 
 if is_config("language", "lua.*") then
@@ -60,12 +82,6 @@ target("swigraylib_lua")
     set_kind("shared")
     set_default(false)
 
-    before_build(function(target)
-        if not (is_plat("windows") or is_plat("linux") or is_plat("macosx")) then
-            os.raise("This xmake script doesn't support this target platform at the moment...")
-        end
-    end)
-
     add_rules("swig.c", {moduletype = "lua"})
     add_packages("raylib")
     if is_config("lua_flavor", "luajit.*") then
@@ -74,10 +90,18 @@ target("swigraylib_lua")
         add_packages("lua")
     end
 
-    local raylibDefs = {"-D_DEFAULT_SOURCE", "-DPLATFORM_DESKTOP", "-DGRAPHICS_API_OPENGL_33", "-DPHYSAC_IMPLEMENTATION"}
+    local platformSymbols = getPlatformSymbols()
+    local raylibDefs = {"-DPHYSAC_IMPLEMENTATION"}
+    table.join2(raylibDefs, platformSymbols.raylib)
     local swigflags = {"-no-old-metatable-bindings", "-Iraylib/src"}
     table.join2(swigflags, raylibDefs)
-    table.join2(swigflags, getPlatformDefineSymbols())
+    table.join2(swigflags, platformSymbols.swig)
+    if has_config("use_physac") then
+        table.join2(swigflags, {"-DSWIGRAYLIB_USE_PHYSAC"})
+    end
+    if has_config("use_easings") then
+        table.join2(swigflags, {"-DSWIGRAYLIB_USE_EASINGS"})
+    end
 
     add_includedirs("raylib/src")
     add_files("raylib.i", {swigflags = swigflags})

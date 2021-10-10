@@ -12,11 +12,12 @@ This repo generates raylib bindings to other languages (eg. Lua), by providing a
 
 - SWIG 4.0.2
 - raylib 3.7.0
+    - `config.h`
     - `raylib.h`
     - `raymath.h`
     - `rlgl.h`
-    - `physac.h`
-    - `easings.h`
+    - `physac.h` (optional, off by default)
+    - `easings.h` (optional, off by default)
 - Supported languages:
     - [x] Lua
 

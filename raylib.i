@@ -36,9 +36,17 @@
     #include "raylib.h"
     #include "raymath.h"
     #include "rlgl.h"
+%}
+#ifdef SWIGRAYLIB_USE_PHYSAC
+%{
     #include "physac.h"
+%}
+#endif
+#ifdef SWIGRAYLIB_USE_EASINGS
+%{
     #include "easings.h"
 %}
+#endif
 
 //------
 // General tags
@@ -119,7 +127,9 @@
 %array_functions(VertexBuffer, VertexBufferArray)
 %array_functions(DrawCall, DrawCallArray)
 %array_functions(RenderBatch, RenderBatchArray)
+#ifdef SWIGRAYLIB_USE_PHYSAC
 %array_functions(PhysicsBodyData, PhysicsBodyDataArray)
+#endif
 
 //------
 // Typemap tags
@@ -432,5 +442,9 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 %include "raylib.h"
 %include "raymath.h"
 %include "rlgl.h"
+#ifdef SWIGRAYLIB_USE_PHYSAC
 %include "physac.h"
+#endif
+#ifdef SWIGRAYLIB_USE_EASINGS
 %include "easings.h"
+#endif
