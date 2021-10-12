@@ -22,6 +22,12 @@
 
 %module raylib
 
+%luacode {
+    local _moduleName = "raylib"
+    local _swig = _G[_moduleName]
+    _G[_moduleName] = nil
+}
+
 // Overcome `__stdcall`, `__cdecl` and such.
 %include <windows.i>
 
@@ -253,10 +259,10 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 #ifdef SWIGLUA
 %define REG_COLOR(colorName)
     %constant Color _SWIGExtra_##colorName = colorName;
-    %luacode{raylib.colorName = raylib._SWIGExtra_##colorName}
+    %luacode{_swig.colorName = _swig._SWIGExtra_##colorName}
 %enddef
-%define REG_ALIAS(name, value)
-    %luacode{raylib.name = raylib.value}
+%define REG_ALIAS(dest, source)
+    %luacode{_swig.dest = _swig.source}
 %enddef
 #endif
 //colors
@@ -319,26 +325,32 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 //------
 
 %luacode {
-    local _metatable = getmetatable(raylib)
-    local _module = {}
-    for k, v in pairs(raylib) do rawset(raylib, k, nil); rawset(_module, k, v) end
-    local _wrapper = setmetatable(raylib, {
+    local _wrapper = {}
+    local _metatable = getmetatable(_swig)
+    for k, v in pairs(_swig) do
+        rawset(_swig, k, nil)
+        rawset(_wrapper, k, v)
+    end
+    _wrapper, _swig = _swig, _wrapper
+    setmetatable(_wrapper, {
         __index = function(t,k)
-            local v = _module[k]
+            local v = _swig[k]
             rawset(t,k,v)
             return v
         end})
-    _wrapper.swig = setmetatable(_module, _metatable)
+    setmetatable(_swig, _metatable)
+    _wrapper.swig = _swig
+    package.loaded[_moduleName] = _wrapper
 
     local _arrayGetterMapping = {
-        ["int"] = _module.IntArray_getitem,
-        ["float"] = _module.FloatArray_getitem,
-        ["charP"] = _module.CharPArray_getitem,
-        ["Color"] = _module.ColorArray_getitem,
-        ["CharInfo"] = _module.CharInfoArray_getitem,
-        ["Rectangle"] = _module.RectangleArray_getitem,
-        ["Material"] = _module.MaterialArray_getitem,
-        ["ModelAnimation"] = _module.ModelAnimationArray_getitem,
+        ["int"] = _swig.IntArray_getitem,
+        ["float"] = _swig.FloatArray_getitem,
+        ["charP"] = _swig.CharPArray_getitem,
+        ["Color"] = _swig.ColorArray_getitem,
+        ["CharInfo"] = _swig.CharInfoArray_getitem,
+        ["Rectangle"] = _swig.RectangleArray_getitem,
+        ["Material"] = _swig.MaterialArray_getitem,
+        ["ModelAnimation"] = _swig.ModelAnimationArray_getitem,
     }
     local function _CArrayToLuaTab(arrayType, cArray, len)
         local tab = {}
@@ -350,91 +362,91 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     end
 
     function _wrapper.Vector2(x, y)
-        local vec = _module.Vector2()
+        local vec = _swig.Vector2()
         if x then vec.x, vec.y = x, y end
         return vec
     end
     function _wrapper.Vector3(x, y, z)
-        local vec = _module.Vector3()
+        local vec = _swig.Vector3()
         if x then vec.x, vec.y, vec.z = x, y, z end
         return vec
     end
     function _wrapper.Vector4(x, y, z, w)
-        local vec = _module.Vector4()
+        local vec = _swig.Vector4()
         if x then vec.x, vec.y, vec.z, vec.w = x, y, z, w end
         return vec
     end
     _wrapper.Quaternion = _wrapper.Vector4
     function _wrapper.Color(r, g, b, a)
-        local col = _module.Color()
+        local col = _swig.Color()
         if r then col.r, col.g, col.b = r, g, b end
         if a then col.a = a end
         return col
     end
     function _wrapper.Rectangle(x, y, w, h)
-        local rect = _module.Rectangle()
+        local rect = _swig.Rectangle()
         if x then rect.x, rect.y = x, y end
         if w then rect.width, rect.height = w, h end
         return rect
     end
     function _wrapper.BoundingBox(min, max)
-        local box = _module.BoundingBox()
+        local box = _swig.BoundingBox()
         if min then box.min, box.max = min, max end
         return box
     end
 
     function _wrapper.GetDirectoryFiles(dirPath)
-        return _CArrayToLuaTab("charP", _module.GetDirectoryFiles(dirPath))
+        return _CArrayToLuaTab("charP", _swig.GetDirectoryFiles(dirPath))
     end
     function _wrapper.GetDroppedFiles()
-        return _CArrayToLuaTab("charP", _module.GetDroppedFiles())
+        return _CArrayToLuaTab("charP", _swig.GetDroppedFiles())
     end
 
     function _wrapper.LoadImageColors(image)
-        return _CArrayToLuaTab("Color", _module.LoadImageColors(), image.width*image.height)
+        return _CArrayToLuaTab("Color", _swig.LoadImageColors(), image.width*image.height)
     end
     function _wrapper.LoadImagePalette(image, maxPaletteSize)
-        return _CArrayToLuaTab("Color", _module.LoadImagePalette(image, maxPaletteSize))
+        return _CArrayToLuaTab("Color", _swig.LoadImagePalette(image, maxPaletteSize))
     end
     function _wrapper.UnloadImageColors(colors)
-        return _module.UnloadImageColors(colors[1])
+        return _swig.UnloadImageColors(colors[1])
     end
     function _wrapper.UnloadImagePalette(colors)
-        return _module.UnloadImagePalette(colors[1])
+        return _swig.UnloadImagePalette(colors[1])
     end
 
     function _wrapper.DrawTexturePoly(texture, center, points, texcoords, tint)
-        return _module._SWIGExtra_DrawTexturePoly_ArgRearrange(texture, center, points, texcoords, tint)
+        return _swig._SWIGExtra_DrawTexturePoly_ArgRearrange(texture, center, points, texcoords, tint)
     end
 
     function _wrapper.LoadFontData(fileData, dataSize, fontSize, fontChars, type)
-        return _CArrayToLuaTab("CharInfo", _module._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
+        return _CArrayToLuaTab("CharInfo", _swig._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
     end
     function _wrapper.UnloadFontData(charInfos)
-        return _module.UnloadFontData(charInfos[1], #charInfos)
+        return _swig.UnloadFontData(charInfos[1], #charInfos)
     end
     function _wrapper.GenImageFontAtlas(chars, fontSize, padding, packMethod)
-        local image, recs, charsCount = _module._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
+        local image, recs, charsCount = _swig._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
         return image, _CArrayToLuaTab("Rectangle", recs, charsCount)
     end
     function _wrapper.GetCodepoints(text)
-        return _CArrayToLuaTab("int", _module.GetCodepoints(text))
+        return _CArrayToLuaTab("int", _swig.GetCodepoints(text))
     end
 
     function _wrapper.LoadMaterials(fileName)
-        return _CArrayToLuaTab("Material", _module.LoadMaterials(fileName))
+        return _CArrayToLuaTab("Material", _swig.LoadMaterials(fileName))
     end
     function _wrapper.LoadModelAnimations(fileName)
-        return _CArrayToLuaTab("ModelAnimation", _module.LoadModelAnimations(fileName))
+        return _CArrayToLuaTab("ModelAnimation", _swig.LoadModelAnimations(fileName))
     end
     function _wrapper.UnloadModelAnimations(animations)
-        return _module.UnloadModelAnimations(animations[1], #animations)
+        return _swig.UnloadModelAnimations(animations[1], #animations)
     end
     function _wrapper.MatrixToFloat(matrix)
-        return _CArrayToLuaTab("float", _module.MatrixToFloat(matrix), 16)
+        return _CArrayToLuaTab("float", _swig.MatrixToFloat(matrix), 16)
     end
     function _wrapper.Vector3ToFloat(vector3)
-        return _CArrayToLuaTab("float", _module.Vector3ToFloat(vector3), 3)
+        return _CArrayToLuaTab("float", _swig.Vector3ToFloat(vector3), 3)
     end
 }
 
