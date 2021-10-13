@@ -1,5 +1,5 @@
 add_rules("mode.release", "mode.debug")
-set_languages(is_plat("windows") and "c11" or "c99")
+set_languages("c11")
 
 option("language")
     set_showmenu(true)
@@ -10,7 +10,7 @@ option_end()
 
 option("lua_flavor")
     set_showmenu(true)
-    set_category("lua_options/lua_flavor")
+    set_category("swig_options/lua_options/lua_flavor")
     set_default("luajit")
     set_values("luajit", "lua5.1", "lua5.2", "lua5.3", "lua5.4")
 option_end()
@@ -41,48 +41,61 @@ if is_config("language", "lua.*") then
     end
 end
 
-local platformAddDeps
-local platformSymbols
+local extraRaylibDep
+local baseRaylibFlags = {"-DPHYSAC_IMPLEMENTATION"}
+local extraRaylibFlags
+local baseSwigFlags = {"-no-old-metatable-bindings"}
+local extraSwigFlags
 if is_plat("windows") then
-    add_requires("glfw")
-    platformAddDeps = function()
-        add_packages("glfw")
+    extraRaylibDep = function()
         add_syslinks("gdi32", "user32", "winmm", "shell32")
     end
-    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D_WIN32"}}
+    extraRaylibFlags = {"-DPLATFORM_DESKTOP"}
+    extraSwigFlags = {"-D_WIN32"}
 elseif is_plat("linux") then
-    add_requires("glfw")
-    platformAddDeps = function()
-        add_packages("glfw")
+    add_requires("libx11", "libxrandr", "libxrender", "libxinerama", "libxcursor", "libxi", "libxext")
+    extraRaylibDep = function()
         add_syslinks("pthread", "dl", "m")
+        add_packages("libx11", "libxrandr", "libxrender", "libxinerama", "libxcursor", "libxi", "libxext")
     end
-    platformSymbols = {raylib={"-DPLATFORM_DESKTOP", "-D_DEFAULT_SOURCE"}, swig={"-D__linux__"}}
+    extraRaylibFlags = {"-DPLATFORM_DESKTOP", "-D_DEFAULT_SOURCE"}
+    extraSwigFlags = {"-D__linux__"}
 elseif is_plat("bsd") then  -- Untested
-    add_requires("glfw")
-    platformAddDeps = function()
-        add_packages("glfw")
+    add_requires("libx11", "libxrandr", "libxrender", "libxinerama", "libxcursor", "libxi", "libxext")
+    extraRaylibDep = function()
         add_syslinks("pthread", "dl", "m")
+        add_packages("libx11", "libxrandr", "libxrender", "libxinerama", "libxcursor", "libxi", "libxext")
     end
-    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__FreeBSD__"}}
+    extraRaylibFlags = {"-DPLATFORM_DESKTOP"}
+    extraSwigFlags = {"-D__FreeBSD__"}
 elseif is_plat("macosx") then -- Untested
-    add_requires("glfw")
-    platformAddDeps = function()
-        add_packages("glfw")
+    extraRaylibDep = function()
         add_frameworks("CoreVideo", "CoreGraphics", "AppKit", "IOKit", "CoreFoundation", "Foundation")
     end
-    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__APPLE__"}}
+    extraRaylibFlags = {"-DPLATFORM_DESKTOP"}
+    extraSwigFlags = {"-D__APPLE__"}
 elseif is_plat("android") then -- Untested
-    platformAddDeps = nil
-    platformSymbols = {raylib={"-DPLATFORM_ANDROID"}, swig={"-D__ANDROID__"}}
+    extraRaylibDep = nil
+    extraRaylibFlags = {"-DPLATFORM_ANDROID"}
+    extraSwigFlags = {"-D__ANDROID__"}
 elseif is_plat("iphoneos") then -- Untested
-    platformAddDeps = nil
-    platformSymbols = {raylib={"-DPLATFORM_DESKTOP"}, swig={"-D__APPLE__", "-DTARGET_OS_IOS"}}
+    extraRaylibDep = nil
+    extraRaylibFlags = {"-DPLATFORM_DESKTOP"}
+    extraSwigFlags = {"-D__APPLE__", "-DTARGET_OS_IOS"}
 elseif is_plat("wasm") then -- Untested
-    platformAddDeps = nil
-    platformSymbols = {raylib={"-DPLATFORM_WEB"}, swig={"-D__EMSCRIPTEN__"}}
+    extraRaylibDep = nil
+    extraRaylibFlags = {"-DPLATFORM_WEB"}
+    extraSwigFlags = {"-D__EMSCRIPTEN__"}
 else
-    platformAddDeps = nil
-    platformSymbols = {raylib={}, swig={}}
+    extraRaylibDep = nil
+    extraRaylibFlags = {}
+    extraSwigFlags = {}
+end
+if has_config("use_physac") then
+    table.insert(extraSwigFlags, "-DSWIGRAYLIB_USE_PHYSAC")
+end
+if has_config("use_easings") then
+    table.insert(extraSwigFlags, "-DSWIGRAYLIB_USE_EASINGS")
 end
 
 target("swigraylib")
@@ -106,27 +119,25 @@ target("swigraylib_lua")
     set_default(false)
 
     add_rules("swig.c", {moduletype = "lua"})
-
     if is_config("lua_flavor", "luajit.*") then
         add_packages("luajit")
     elseif is_config("lua_flavor", "lua.*") then
         add_packages("lua")
     end
 
-    if platformAddDeps then platformAddDeps() end
-    local raylibDefs = {"-DPHYSAC_IMPLEMENTATION"}
-    table.join2(raylibDefs, platformSymbols.raylib)
-    local swigflags = {"-no-old-metatable-bindings", "-Iraylib/src"}
+    if extraRaylibDep then extraRaylibDep() end
+
+    local raylibDefs = {}
+    table.join2(raylibDefs, baseRaylibFlags)
+    table.join2(raylibDefs, extraRaylibFlags)
+
+    local swigflags = {"-Iraylib/src"}
     table.join2(swigflags, raylibDefs)
-    table.join2(swigflags, platformSymbols.swig)
-    if has_config("use_physac") then
-        table.join2(swigflags, {"-DSWIGRAYLIB_USE_PHYSAC"})
-    end
-    if has_config("use_easings") then
-        table.join2(swigflags, {"-DSWIGRAYLIB_USE_EASINGS"})
-    end
+    table.join2(swigflags, baseSwigFlags)
+    table.join2(swigflags, extraSwigFlags)
 
     add_includedirs("raylib/src")
+    add_includedirs("raylib/src/external/glfw/include")
     add_files("raylib/src/*.c")
     add_files("raylib.i", {swigflags = swigflags})
 
