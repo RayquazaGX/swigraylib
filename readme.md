@@ -29,7 +29,7 @@ This repo generates bindings for raylib to other languages (eg. Lua), by providi
     - `physac.h` (optional, off by default)
     - `easings.h` (optional, off by default)
 - Supported languages:
-    - [x] Lua
+    - [x] Lua (5.1 ~ 5.4, or LuaJIT)
 
 ## Build ##
 
