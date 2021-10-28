@@ -26,7 +26,6 @@ This repo generates raylib bindings to other languages (eg. Lua), by providing a
 This provided build method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) installed.
 
 ```sh
-xmake update -s dev # SWIG file support currently requires dev branch of xmake. Will not need this line anymore after xmake publishes a release.
 xmake config --menu # Config the project using a terminal ui. You choose a target language and other options in the menu `Project Configuration`.
 xmake               # Build with saved configs.
 ```
@@ -62,12 +61,12 @@ raylib.CloseWindow()
 
 ## Performance Notes ##
 
-- Because the module contains a large number(hundreds) of symbols binded, for some languages(Lua) a wrapper on top of the generated SWIG module has been added, providing only a small set of symbols when the module imported, and only automatically adding needed symbols on demand, thus saving searching time. See file `raylib.i`.
+- Since the module contains a large number(hundreds) of symbols, for some languages(Lua) a wrapper on top of the generated SWIG module has been added, providing only a small set of symbols when the module imported, and only automatically adding needed symbols on demand, thus saving searching time. See file `raylib.i`.
     - The original unwrapped module is still accessible in these languages. eg. `raylib.swig` in Lua.
 - Interops are expensive. Here are some tips to save interop counts:
-    - If a simple struct instance is to be modified many times (eg. C `Vector2` value calculated inside a loop):
+    - If a simple struct instance is to be modified many times (eg. C `Vector2` value calculated inside a loop in a script language):
         - It might not be a good idea to use the struct fields directly in complex calculations, because SWIG wraps the getter and setter functions to contain implicit C <-> script type conversions. Instead, if needed, copy the fields as local types, and after calculations copy back the results to the struct instance.
-        - Note that in raylib many API functions accepting `Vector2` as parameters also have a sibling version which accepts simple `int x, int y`, and this means in many situations you can just avoid alloc'ing and modifying C `Vector2` instances at all.
+        - Note that in raylib many API functions accepting `Vector2` as parameters also have sibling versions which accept simple `int x, int y`, and this means in many situations you can just avoid alloc'ing and modifying C `Vector2` instances at all.
     - You can modify the binding file to contain you own C functions to possibly prevent some interops happen, and generate bindings of them for your need.
 - `examples/textures_bunnymark.lua` is ready for benchmarking performance.
 

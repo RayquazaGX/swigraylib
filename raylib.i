@@ -20,15 +20,21 @@
 //    Lua: All bindings are now in Lua style: featuring multi-val return, LuaTable-CArray conversion, etc.
 //    e.g. `local compressed, compressedLen = raylib.CompressData(data, dataLen)`; `local materials_luaTable = raylib.LoadMaterials(fileName)`
 
+//------
+// Module declaration
+//------
+
 %module raylib
 
+#ifdef SWIGLUA
 %luacode {
     local _moduleName = "raylib"
     local _swig = _G[_moduleName]
     _G[_moduleName] = nil
 }
+#endif
 
-// Overcome `__stdcall`, `__cdecl` and such.
+// Overcome `__stdcall`, `__cdecl` etc. .
 %include <windows.i>
 
 // Define bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
@@ -138,68 +144,71 @@
 #endif
 
 //------
-// Typemap tags
+// Typemap tags + Import the headers
 //------
 
 %include <typemaps.i>
+#ifdef SWIGLUA
+%typemap(in) SWIGTYPE *INPUT {
+    if (!SWIG_IsOK(SWIG_ConvertPtr(L, $argnum, (void **)&$1, $1_descriptor, 0))){
+        SWIG_fail_ptr("$symname", $argnum, $1_descriptor);
+    }
+}
+%typemap(in, numinputs=0) SWIGTYPE *OUTPUT {};
+%typemap(argout) SWIGTYPE *OUTPUT{
+    SWIG_NewPointerObj(L, $1, $1_descriptor, 1); SWIG_arg++;
+}
+%typemap(argout) SWIGTYPE *OUTPUT_UNOWN{
+    SWIG_NewPointerObj(L, $1, $1_descriptor, 0); SWIG_arg++;
+}
+%typemap(in) SWIGTYPE *INOUT = SWIGTYPE *INPUT;
+%typemap(argout) SWIGTYPE *INOUT = SWIGTYPE *OUTPUT_UNOWN;
+#endif
 
-//module: core
-extern unsigned char *LoadFileData(const char *fileName, unsigned int *OUTPUT);
-extern char **GetDirectoryFiles(const char *dirPath, int *OUTPUT);
-extern char **GetDroppedFiles(int *OUTPUT);
-extern unsigned char *CompressData(unsigned char *data, int dataLength, int *OUTPUT);
-extern unsigned char *DecompressData(unsigned char *compData, int compDataLength, int *OUTPUT);
-extern void UpdateCamera(Camera *INOUT);
+//config.h
+%include "config.h"
 
-//module: shapes
-%apply (Vector2 *INPUT, int) {(Vector2 *points, int pointsCount)};
-extern void DrawLineStrip(Vector2 *points, int pointsCount, Color color);
-extern void DrawTriangleFan(Vector2 *points, int pointsCount, Color color);
-extern void DrawTriangleStrip(Vector2 *points, int pointsCount, Color color);
-extern bool CheckCollisionLines(Vector2 s1, Vector2 e1, Vector2 s2, Vector2 e2, Vector2 *OUTPUT);
-%clear (Vector2 *points, int pointsCount);
-
-//module: textures
-%apply (Vector2 *INPUT, int) {(Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount)};
-extern Image LoadImageAnim(const char *fileName, int *OUTPUT);
-extern Color *LoadImagePalette(Image image, int maxPaletteSize, int *OUTPUT);
-extern void GenTextureMipmaps(Texture2D *INOUT);
-extern void _SWIGExtra_DrawTexturePoly_ArgRearrange(Texture2D texture, Vector2 center, Vector2 *points, int pointsCount, Vector2 *texcoords, int texcoordsCount, Color tint);
-%clear (Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount);
-
-//module: text
-%apply (int *INPUT, int) {(int *fontChars, int charsCount), (int *codepoints, int length)};
-%apply int* OUTPUT{int *charsCount_out};
-%apply SWIGTYPE** OUTPUT{Rectangle **recs};
-extern Font LoadFontEx(const char *fileName, int fontSize, int *fontChars, int charsCount);
-extern Font LoadFontFromMemory(const char *fileType, const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount);
-extern CharInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount, int type, int *charsCount_out);
-extern Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const CharInfo *chars, int charsCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *charsCount_out);
-extern char *TextToUtf8(int *codepoints, int length);
-extern int *GetCodepoints(const char *text, int *OUTPUT);
-extern int GetNextCodepoint(const char *text, int *OUTPUT);
-extern char *_SWIGExtra_CodepointToUtf8_WithNullTerm(int codepoint);
-%clear (int *fontChars, int charsCount), (int *codepoints, int length);
-%clear int *charsCount_out;
-%clear Rectangle **recs;
-
-//module: models
+//raylib.h
+%apply unsigned int *OUTPUT {unsigned int *bytesRead};
+%apply int *OUTPUT {int *compDataLength, int *dataLength, int *frames, int *bytesProcessed};
+%apply int *OUTPUT {int *count, int *colorsCount, int *charsCount_out, int *materialCount, int *animsCount};
+%apply SWIGTYPE *OUTPUT {Vector2 *collisionPoint};
+%apply SWIGTYPE *OUTPUT {Vector3 *collisionPoint};
+%apply SWIGTYPE **OUTPUT {Rectangle **recs};
+%apply SWIGTYPE *INOUT {Camera *camera};
+%apply SWIGTYPE *INOUT {Texture2D *texture};
+%apply SWIGTYPE *INOUT {Mesh *mesh};
+%apply (Vector2 *INPUT, int) {(Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int charsCount), (int *codepoints, int length)};
 %apply (Vector3 *INPUT, int) {(Vector3 *points, int pointsCount)};
 %apply (Matrix *INPUT, int) {(Matrix *transforms, int instances)};
-extern void DrawTriangleStrip3D(Vector3 *points, int pointsCount, Color color);
-extern void UploadMesh(Mesh *INOUT, bool dynamic);
-extern void DrawMeshInstanced(Mesh mesh, Material material, Matrix *transforms, int instances);
-extern Material *LoadMaterials(const char *fileName, int *OUTPUT);
-extern ModelAnimation *LoadModelAnimations(const char *fileName, int *OUTPUT);
-void MeshTangents(Mesh *INOUT);
-void MeshBinormals(Mesh *INOUT);
-extern bool CheckCollisionRaySphereEx(Ray ray, Vector3 center, float radius, Vector3 *OUTPUT);
-%clear (Vector3 *points, int pointsCount);
-%clear (Matrix *transforms, int instances);
+
+%include "raylib.h"
+void _SWIGExtra_DrawTexturePoly_ArgRearrange(Texture2D texture, Vector2 center, Vector2 *points, int pointsCount, Vector2 *texcoords, int texcoordsCount, Color tint);
+CharInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount, int type, int *charsCount_out);
+Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const CharInfo *chars, int charsCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *charsCount_out);
+char *_SWIGExtra_CodepointToUtf8_WithNullTerm(int codepoint);
+
+%clear unsigned int *bytesRead, int *compDataLength, int *dataLength, int *frames, int *bytesProcessed;
+%clear int *count, int *colorsCount, int *charsCount_out, int *materialCount, int *animsCount;
+%clear Vector2 *collisionPoint, Vector3 *collisionPoint;
+%clear Rectangle **recs;
+%clear Camera *camera, Texture2D *texture, Mesh *mesh;
+%clear (Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int charsCount), (int *codepoints, int length), (Vector3 *points, int pointsCount), (Matrix *transforms, int instances);
 
 //raymath.h
 extern void Vector3OrthoNormalize(Vector3 *INOUT, Vector3 *INOUT);
 extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
+%include "raymath.h"
+
+//other headers
+%include "rlgl.h" //Don't do typemaps to save C++ <-> script type conversions; use array functions in case you really need rlgl functions
+#ifdef SWIGRAYLIB_USE_PHYSAC
+%include "physac.h"
+#endif
+#ifdef SWIGRAYLIB_USE_EASINGS
+%include "easings.h"
+#endif
+
 
 //------
 // Helper functions
@@ -258,13 +267,14 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 
 #ifdef SWIGLUA
 %define REG_COLOR(colorName)
-    %constant Color _SWIGExtra_##colorName = colorName;
-    %luacode{_swig.colorName = _swig._SWIGExtra_##colorName}
+    %inline %{ const Color _SWIGExtra_##colorName = colorName; %}
+    %luacode %{ _swig[#colorName] = _swig._SWIGExtra_##colorName %}
 %enddef
 %define REG_ALIAS(dest, source)
-    %luacode{_swig.dest = _swig.source}
+    %luacode %{ _swig[#dest] = _swig[#source] %}
 %enddef
 #endif
+
 //colors
 REG_COLOR(LIGHTGRAY)
 REG_COLOR(GRAY)
@@ -324,7 +334,8 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 // Lua wrapper functions
 //------
 
-%luacode {
+#ifdef SWIGLUA
+%luacode %{
     local _wrapper = {}
     local _metatable = getmetatable(_swig)
     for k, v in pairs(_swig) do
@@ -448,15 +459,5 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     function _wrapper.Vector3ToFloat(vector3)
         return _CArrayToLuaTab("float", _swig.Vector3ToFloat(vector3), 3)
     end
-}
-
-%include "config.h"
-%include "raylib.h"
-%include "raymath.h"
-%include "rlgl.h"
-#ifdef SWIGRAYLIB_USE_PHYSAC
-%include "physac.h"
-#endif
-#ifdef SWIGRAYLIB_USE_EASINGS
-%include "easings.h"
+%}
 #endif
