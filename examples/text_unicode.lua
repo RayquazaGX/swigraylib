@@ -117,9 +117,9 @@ local screenWidth, screenHeight = 800, 450
 raylib.SetConfigFlags(raylib.FLAG_MSAA_4X_HINT + raylib.FLAG_VSYNC_HINT);
 raylib.InitWindow(screenWidth, screenHeight, "raylib [text] example - unicode")
 
-local fontDefault = raylib.LoadFont("resources/dejavu.fnt")
-local fontAsian = raylib.LoadFont("resources/noto_cjk.fnt")
-local fontEmoji = raylib.LoadFont("resources/symbola.fnt")
+local fontDefault = raylib.LoadFont("../raylib/examples/text/resources/dejavu.fnt")
+local fontAsian = raylib.LoadFont("../raylib/examples/text/resources/noto_cjk.fnt")
+local fontEmoji = raylib.LoadFont("../raylib/examples/text/resources/symbola.fnt")
 
 local hoveredPos, selectedPos = {x=0, y=0}, {x=0, y=0}
 

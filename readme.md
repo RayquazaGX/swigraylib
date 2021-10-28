@@ -107,5 +107,4 @@ Would be nicer if this repo can be a collection featuring Ruby/Python/... bindin
 
 ## LICENSE ##
 
-- `examples/resources/` folder has its own `LICENSE` file inside.
-- Other part of the repo: MIT
+MIT

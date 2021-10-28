@@ -9,7 +9,7 @@ local MAX_BATCH_ELEMENTS = 8192
 local screenWidth, screenHeight = 800, 450
 raylib.InitWindow(screenWidth, screenHeight, "raylib [textures] example - bunnymark")
 
-local texBunny = raylib.LoadTexture("resources/wabbit_alpha.png")
+local texBunny = raylib.LoadTexture("../raylib/examples/textures/resources/wabbit_alpha.png")
 local bunnies = {}
 
 raylib.SetTargetFPS(60)
