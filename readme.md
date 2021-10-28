@@ -2,11 +2,21 @@
 
 [SWIG](http://www.swig.org/) binding for [raylib](https://www.raylib.com/index.html)
 
-This repo generates raylib bindings to other languages (eg. Lua), by providing a `raylib.i` SWIG interface file.
+This repo generates bindings for raylib to other languages (eg. Lua), by providing a `raylib.i` SWIG interface file.
 
 > SWIG is a software development tool that connects programs written in C and C++ with a variety of high-level programming languages (C#, Java, Lua, Python, Ruby, ...)
 
 > raylib is a simple and easy-to-use library to enjoy videogames programming.
+
+## Why yet another binding? What's the difference? ##
+
+- Pros:
+    - In SWIG interface files we don't need to list all the functions and structures the lib provides. This is a small difference but crucial. With the SWIG typemaps, the bindings are generated more against the *style* of the API than the API itself. There is a great chance the interface file doesn't need to change at all when a new version of the lib arrives.
+    - It's possible to generate bindings to multiple target languages with the same interface file. (Though there is only Lua support by now.) It's easy to add binding support for another target language, as long as that language is supported by SWIG.
+    - SWIG offers neat type checks and useful error messages when type mismatch happens.
+    - I want to make it more natural using a C/C++ library in a script language. Users won't need to care about C/C++ memory management and other low-level stuffs. See *Usage Notes* below.
+- Cons:
+    - Comparing with straight-forward FFI bindings, this binding is relatively slow. A layer provided by SWIG takes care of interops, and it does cost some performance. But overall the binding is still fast enough for common uses. For tips on saving interop counts and benchmarking, see *Performance Notes* below.
 
 ## Current Status ##
 
@@ -74,7 +84,7 @@ raylib.CloseWindow()
         local files = raylib.GetDirectoryFiles(".")
         for i = 1, #files do print(files[i]) end
         ```
-- In case you really need to manipulate C data, you can use array functions provided by SWIG (see `raylib.i` in the repo for appliable `%array_functions`, [SWIG Doc `%array_functions`](www.swig.org/Doc4.0/Library.html#Library_carrays)):
+- In some rare cases you really need to manipulate C data, you can use the array functions provided by SWIG (see `raylib.i` in the repo for applicable `%array_functions`, [SWIG Doc `%array_functions`](www.swig.org/Doc4.0/Library.html#Library_carrays)):
     - Lua:
         ```lua
         -- Alloc an array `unsigned char [5]`
