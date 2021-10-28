@@ -26,18 +26,21 @@ This repo generates raylib bindings to other languages (eg. Lua), by providing a
 This provided build method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) installed.
 
 ```sh
-xmake config --menu # Config the project using a terminal ui. You choose a target language and other options in the menu `Project Configuration`.
-xmake               # Build with saved configs.
+# Config the project using a terminal ui, eg. Windows `cmd`.
+# You choose a target language and other options in the menu `Project Configuration`.
+xmake config --menu
+# Build with saved configs.
+xmake
 ```
 
-## Example ##
+## Examples ##
 
 ### Lua ###
 
 > Print raylib version in the terminal:
 ```sh
 # Start luajit to test. You should change the path of the output library accordingly.
-luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swig?_lua.so'"
+luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swigraylib_lua.so'"
 > raylib = require "raylib"
 > print(raylib.RAYLIB_VERSION)
 3.7
@@ -45,7 +48,7 @@ luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swig?_
 
 > Basic window in Lua:
 ```lua
--- Original version in C: https://github.com/raysan5/raylib/blob/master/examples/core/core_basic_window.c, by Ramon Santamaria (@raysan5)
+-- Original version in C by Ramon Santamaria (@raysan5): https://github.com/raysan5/raylib/blob/master/examples/core/core_basic_window.c
 local raylib = require "raylib"
 local screenWidth, screenHeight = 800, 450
 raylib.InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window")
@@ -59,10 +62,34 @@ end
 raylib.CloseWindow()
 ```
 
+## Usage Notes ##
+
+- Bindings fit in the common code style of the target language! No need to ever care about C pointers most of the time.
+    - Lua:
+        ```lua
+        -- Out arguments are after the return value
+        local compressed, compressedLen = raylib.CompressData(data, dataLen)
+
+        -- Functions returning an array in C now return a Lua table
+        local files = raylib.GetDirectoryFiles(".")
+        for i = 1, #files do print(files[i]) end
+        ```
+- In case you really need to manipulate C data, you can use array functions provided by SWIG (see `raylib.i` in the repo for appliable `%array_functions`, [SWIG Doc `%array_functions`](www.swig.org/Doc4.0/Library.html#Library_carrays)):
+    - Lua:
+        ```lua
+        -- Alloc an array `unsigned char [5]`
+        local data = raylib.new_UcharArray(5)
+        -- Set values, note that index starts from 0
+        for i = 0, 4 do raylib.UcharArray_setitem(data, i, 255) end
+        -- Get values, note that index starts from 0
+        for i = 0, 4 do print(raylib.UcharArray_getitem(data, i) end
+        -- Free an array
+        raylib.delete_UcharArray(data)
+        ```
+- A few functions are unsupported for the simplicity of the binding process. See `raylib.i`.
+
 ## Performance Notes ##
 
-- Since the module contains a large number(hundreds) of symbols, for some languages(Lua) a wrapper on top of the generated SWIG module has been added, providing only a small set of symbols when the module imported, and only automatically adding needed symbols on demand, thus saving searching time. See file `raylib.i`.
-    - The original unwrapped module is still accessible in these languages. eg. `raylib.swig` in Lua.
 - Interops are expensive. Here are some tips to save interop counts:
     - If a simple struct instance is to be modified many times (eg. C `Vector2` value calculated inside a loop in a script language):
         - It might not be a good idea to use the struct fields directly in complex calculations, because SWIG wraps the getter and setter functions to contain implicit C <-> script type conversions. Instead, if needed, copy the fields as local types, and after calculations copy back the results to the struct instance.
