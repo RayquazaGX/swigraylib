@@ -428,7 +428,7 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     end
 
     function _swig.LoadImageColors(image)
-        return _CArrayToLuaTab("Color", _originals.LoadImageColors(), image.width*image.height)
+        return _CArrayToLuaTab("Color", _originals.LoadImageColors(image), image.width*image.height)
     end
     function _swig.LoadImagePalette(image, maxPaletteSize)
         return _CArrayToLuaTab("Color", _originals.LoadImagePalette(image, maxPaletteSize))
@@ -441,17 +441,17 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     end
 
     function _swig.DrawTexturePoly(texture, center, points, texcoords, tint)
-        return _originals._originalsExtra_DrawTexturePoly_ArgRearrange(texture, center, points, texcoords, tint)
+        return _originals._SWIGExtra_DrawTexturePoly_ArgRearrange(texture, center, points, texcoords, tint)
     end
 
     function _swig.LoadFontData(fileData, dataSize, fontSize, fontChars, type)
-        return _CArrayToLuaTab("CharInfo", _originals._originalsExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
+        return _CArrayToLuaTab("CharInfo", _originals._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
     end
     function _swig.UnloadFontData(charInfos)
         return _originals.UnloadFontData(charInfos[1], #charInfos)
     end
     function _swig.GenImageFontAtlas(chars, fontSize, padding, packMethod)
-        local image, recs, charsCount = _originals._originalsExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
+        local image, recs, charsCount = _originals._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
         return image, _CArrayToLuaTab("Rectangle", recs, charsCount)
     end
     function _swig.GetCodepoints(text)
