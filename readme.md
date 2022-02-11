@@ -21,7 +21,7 @@ This repo generates bindings for raylib to other languages (eg. Lua), by providi
 ## Current Status ##
 
 - SWIG 4.0.2
-- raylib 3.7.0
+- raylib 4.0.0
     - `config.h`
     - `raylib.h`
     - `raymath.h`
@@ -53,7 +53,7 @@ xmake
 luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swigraylib_lua.so'"
 > raylib = require "raylib"
 > print(raylib.RAYLIB_VERSION)
-3.7
+4.0
 ```
 
 > Basic window in Lua:

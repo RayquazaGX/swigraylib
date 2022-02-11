@@ -37,7 +37,7 @@ rule("swig")
 
         -- Call swig to generate binding file from interface source file
         batchcmds:mkdir(path.directory(gen))
-        batchcmds:show_progress(opt.progress, "${color.build.object}swig %s{clear}", src)
+        batchcmds:show_progress(opt.progress, "${color.build.object}swig %s", src)
         batchcmds:vrunv(swig.program, swigArgs)
         batchcmds:compile(gen, obj)
 

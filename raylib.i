@@ -1,8 +1,9 @@
-// SWIG-4.0.2 binding for raylib v3.7
+// SWIG-4.0.2 binding for raylib v4.0
 
 // Notes:
 //
 //   Unsupported functions:
+//   Callback setter functions only accept existing C functions and cannot take lua functions by now.
 //   void SetTraceLogCallback(TraceLogCallback callback);
 //   void SetLoadFileDataCallback(LoadFileDataCallback callback);
 //   void SetSaveFileDataCallback(SaveFileDataCallback callback);
@@ -10,15 +11,15 @@
 //   void SetSaveFileTextCallback(SaveFileTextCallback callback);
 //
 //   Ignored functions:
-//   `TextXXX` string manipulation functions are ignored, except `TextToUtf8`.
+//   `TextXXX` string manipulation functions are ignored and not binded.
 //   Because nearly all the script languages supported by SWIG have their own functions dealing strings, therefore bindings of these functions from C are not that helpful and fail both in performance and in maintainability.
 //
 //   `va_list` related behaviours:
 //    Functions like `void TraceLog(int logLevel, const char* text, ...);` are binded using the default behaviour of SWIG, which is, skipping the `...` entirely.
 //    e.g. In Lua, you call `raylib.TraceLog(raylib.LOG_INFO, string.format("%s%d", "This is formatted in Lua instead.", 123))`.
 //
-//    Lua: All bindings are now in Lua style: featuring multi-val return, LuaTable-CArray conversion, etc.
-//    e.g. `local compressed, compressedLen = raylib.CompressData(data, dataLen)`; `local materials_luaTable = raylib.LoadMaterials(fileName)`
+//    Lua: All syntactic behaviours are now wrapped in Lua style: featuring multi-val return, auto LuaTable-CArray conversion, etc.
+//    e.g. `local out, outLen = raylib.EncodeDataBase64(data, dataLen)`; `local materials_luaTable = raylib.LoadMaterials(fileName)`
 
 //------
 // Module declaration
@@ -35,10 +36,11 @@
 #endif
 
 // Overcome `__stdcall`, `__cdecl` etc. .
+#if defined(_WIN32)
 %include <windows.i>
+#endif
 
 // Define bool, to overcome `typedef enum { false, true } bool;` in raylib.h being unrecognized by SWIG
-// c99 already supports bool type, so no need to define it as _Bool
 #ifndef bool
     #define bool bool
 #endif
@@ -51,12 +53,12 @@
 %}
 #ifdef SWIGRAYLIB_USE_PHYSAC
 %{
-    #include "physac.h"
+    #include "extras/physac.h"
 %}
 #endif
 #ifdef SWIGRAYLIB_USE_EASINGS
 %{
-    #include "easings.h"
+    #include "extras/easings.h"
 %}
 #endif
 
@@ -82,14 +84,14 @@
 
 %newobject LoadFileText;
 %delobject UnloadFileText;
-%newobject TextToUtf8;
+%newobject TextCodepointsToUTF8;
 %newobject LoadMaterials;
 %newobject LoadWaveSamples;
 %delobject UnloadWaveSamples;
 %newobject rlReadTexturePixels;
 %newobject rlReadScreenPixels;
 
-%newobject _SWIGExtra_CodepointToUtf8_WithNullTerm;
+%newobject _SWIGExtra_CodepointToUTF8_WithNullTerm;
 %newobject _SWIGExtra_MatrixToFloat;
 %newobject _SWIGExtra_Vector3ToFloat;
 
@@ -101,6 +103,7 @@
 %array_functions(int, IntArray)
 %array_functions(float, FloatArray)
 %array_functions(char, CharArray)
+%array_functions(unsigned short, UshortArray)
 %array_functions(unsigned int, UintArray)
 %array_functions(unsigned char, UcharArray)
 %array_functions(char*, CharPArray)
@@ -111,34 +114,26 @@
 %array_functions(Matrix, MatrixArray)
 %array_functions(Color, ColorArray)
 %array_functions(Rectangle, RectangleArray)
-%array_functions(Image, ImageArray)
-%array_functions(Texture, TextureArray)
-%array_functions(RenderTexture, RenderTextureArray)
-%array_functions(NPatchInfo, NPatchInfoArray)
-%array_functions(CharInfo, CharInfoArray)
-%array_functions(Font, FontArray)
-%array_functions(Camera, CameraArray)
-%array_functions(Camera2D, Camera2DArray)
+// %array_functions(Image, ImageArray)
+// %array_functions(Texture, TextureArray)
+// %array_functions(RenderTexture, RenderTextureArray)
+// %array_functions(NPatchInfo, NPatchInfoArray)
+%array_functions(GlyphInfo, GlyphInfoArray)
+// %array_functions(Font, FontArray)
+// %array_functions(Camera, CameraArray)
+// %array_functions(Camera2D, Camera2DArray)
 %array_functions(Mesh, MeshArray)
-%array_functions(Shader, ShaderArray)
+// %array_functions(Shader, ShaderArray)
 %array_functions(MaterialMap, MaterialMapArray)
 %array_functions(Material, MaterialArray)
-%array_functions(Model, ModelArray)
+// %array_functions(Model, ModelArray)
 %array_functions(Transform, TransformArray)
+%array_functions(Transform*, TransformPArray)
 %array_functions(BoneInfo, BoneInfoArray)
 %array_functions(ModelAnimation, ModelAnimationArray)
-%array_functions(Ray, RayArray)
-%array_functions(RayHitInfo, RayHitInfoArray)
-%array_functions(BoundingBox, BoundingBoxArray)
-%array_functions(Wave, WaveArray)
-%array_functions(Sound, SoundArray)
-%array_functions(Music, MusicArray)
-%array_functions(AudioStream, AudioStreamArray)
-%array_functions(VrDeviceInfo, VrDeviceInfoArray)
-%array_functions(VrStereoConfig, VrStereoConfigArray)
-%array_functions(VertexBuffer, VertexBufferArray)
-%array_functions(DrawCall, DrawCallArray)
-%array_functions(RenderBatch, RenderBatchArray)
+// %array_functions(Ray, RayArray)
+// %array_functions(RayCollision, RayCollisionArray)
+// %array_functions(BoundingBox, BoundingBoxArray)
 #ifdef SWIGRAYLIB_USE_PHYSAC
 %array_functions(PhysicsBodyData, PhysicsBodyDataArray)
 #endif
@@ -170,30 +165,35 @@
 
 //raylib.h
 %apply unsigned int *OUTPUT {unsigned int *bytesRead};
-%apply int *OUTPUT {int *compDataLength, int *dataLength, int *frames, int *bytesProcessed};
-%apply int *OUTPUT {int *count, int *colorsCount, int *charsCount_out, int *materialCount, int *animsCount};
+%apply int *OUTPUT {int *compDataLength, int *dataLength, int *outputLength, int *frames};
+%apply int *OUTPUT {int *count, int *colorCount, int *glyphCount_out, int *materialCount, int *animCount};
+%apply int *INOUT {int *bytesProcessed};
 %apply SWIGTYPE *OUTPUT {Vector2 *collisionPoint};
-%apply SWIGTYPE *OUTPUT {Vector3 *collisionPoint};
 %apply SWIGTYPE **OUTPUT {Rectangle **recs};
 %apply SWIGTYPE *INOUT {Camera *camera};
+%apply SWIGTYPE *INOUT {Image *image};
 %apply SWIGTYPE *INOUT {Texture2D *texture};
 %apply SWIGTYPE *INOUT {Mesh *mesh};
-%apply (Vector2 *INPUT, int) {(Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int charsCount), (int *codepoints, int length)};
-%apply (Vector3 *INPUT, int) {(Vector3 *points, int pointsCount)};
+%apply SWIGTYPE *INOUT {Material *material};
+%apply SWIGTYPE *INOUT {Model *model};
+%apply SWIGTYPE *INOUT {Wave *wave};
+%apply (Vector2 *INPUT, int) {(Vector2 *points, int pointCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int glyphCount), (int *codepoints, int length)};
+%apply (Vector3 *INPUT, int) {(Vector3 *points, int pointCount)};
 %apply (Matrix *INPUT, int) {(Matrix *transforms, int instances)};
 
 %include "raylib.h"
 void _SWIGExtra_DrawTexturePoly_ArgRearrange(Texture2D texture, Vector2 center, Vector2 *points, int pointsCount, Vector2 *texcoords, int texcoordsCount, Color tint);
-CharInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount, int type, int *charsCount_out);
-Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const CharInfo *chars, int charsCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *charsCount_out);
-char *_SWIGExtra_CodepointToUtf8_WithNullTerm(int codepoint);
+GlyphInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int glyphCount, int type, int *glyphCount_out);
+Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const GlyphInfo *chars, int glyphCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *glyphCount_out);
+char *_SWIGExtra_CodepointToUTF8_WithNullTerm(int codepoint);
 
-%clear unsigned int *bytesRead, int *compDataLength, int *dataLength, int *frames, int *bytesProcessed;
-%clear int *count, int *colorsCount, int *charsCount_out, int *materialCount, int *animsCount;
-%clear Vector2 *collisionPoint, Vector3 *collisionPoint;
+%clear unsigned int *bytesRead, int *compDataLength, int *dataLength, int *outputLength, int *frames;
+%clear int *count, int *colorCount, int *glyphCount_out, int *materialCount, int *animCount;
+%clear int *bytesProcessed;
+%clear Vector2 *collisionPoint;
 %clear Rectangle **recs;
-%clear Camera *camera, Texture2D *texture, Mesh *mesh;
-%clear (Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int charsCount), (int *codepoints, int length), (Vector3 *points, int pointsCount), (Matrix *transforms, int instances);
+%clear Camera *camera, Image *image, Texture2D *texture, Mesh *mesh, Material *material, Model *model, Wave *wave;
+%clear (Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int glyphCount), (int *codepoints, int length), (Vector3 *points, int pointsCount), (Matrix *transforms, int instances);
 
 //raymath.h
 extern void Vector3OrthoNormalize(Vector3 *INOUT, Vector3 *INOUT);
@@ -202,11 +202,14 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 
 //other headers
 %include "rlgl.h" //Don't do typemaps to save C++ <-> script type conversions; use array functions in case you really need rlgl functions
+#ifdef TRACELOG //Fix "TRACELOG" redefined error in SWIG
+#undef TRACELOG
+#endif
 #ifdef SWIGRAYLIB_USE_PHYSAC
-%include "physac.h"
+%include "extras/physac.h"
 #endif
 #ifdef SWIGRAYLIB_USE_EASINGS
-%include "easings.h"
+%include "extras/easings.h"
 #endif
 
 
@@ -232,17 +235,17 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
         (void)texcoordsCount;
         DrawTexturePoly(texture, center, points, texcoords, pointsCount, tint);
     };
-    CharInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int charsCount, int type, int *charsCount_out){
-        *charsCount_out = charsCount;
-        return LoadFontData(fileData, dataSize, fontSize, fontChars, charsCount, type);
+    GlyphInfo *_SWIGExtra_LoadFontData_ArgRearrange(const unsigned char *fileData, int dataSize, int fontSize, int *fontChars, int glyphCount, int type, int *glyphCount_out){
+        *glyphCount_out = glyphCount;
+        return LoadFontData(fileData, dataSize, fontSize, fontChars, glyphCount, type);
     };
-    Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const CharInfo *chars, int charsCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *charsCount_out){
-        *charsCount_out = charsCount;
-        return GenImageFontAtlas(chars, recs, charsCount, fontSize, padding, packMethod);
+    Image _SWIGExtra_GenImageFontAtlas_ArgRearrange(const GlyphInfo *chars, int glyphCount, int fontSize, int padding, int packMethod, Rectangle **recs, int *glyphCount_out){
+        *glyphCount_out = glyphCount;
+        return GenImageFontAtlas(chars, recs, glyphCount, fontSize, padding, packMethod);
     };
-    char *_SWIGExtra_CodepointToUtf8_WithNullTerm(int codepoint){
+    char *_SWIGExtra_CodepointToUTF8_WithNullTerm(int codepoint){
         int len;
-        const char *utf8 = CodepointToUtf8(codepoint, &len);
+        const char *utf8 = CodepointToUTF8(codepoint, &len);
         char *utf8NullTerm = (char *)malloc((len+1)*sizeof(char));
         memcpy(utf8NullTerm, utf8, len*sizeof(char));
         utf8NullTerm[len] = '\0';
@@ -303,20 +306,14 @@ REG_COLOR(BLANK)
 REG_COLOR(MAGENTA)
 REG_COLOR(RAYWHITE)
 //macro and typedef aliases
-REG_ALIAS(FormatText, TextFormat)
-REG_ALIAS(LoadText, LoadFileText)
-REG_ALIAS(GetExtension, GetFileExtension)
-REG_ALIAS(GetImageData, LoadImageColors)
-REG_ALIAS(FILTER_POINT, TEXTURE_FILTER_POINT)
-REG_ALIAS(FILTER_BILINEAR, TEXTURE_FILTER_BILINEAR)
-REG_ALIAS(MAP_DIFFUSE, MATERIAL_MAP_DIFFUSE)
-REG_ALIAS(PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, PIXELFORMAT_PIXELFORMAT_UNCOMPRESSED_R8G8B8A8)
 REG_ALIAS(Quaternion, Vector4)
 REG_ALIAS(Texture2D, Texture)
 REG_ALIAS(TextureCubemap, Texture)
 REG_ALIAS(RenderTexture2D, RenderTexture)
-REG_ALIAS(SpriteFont, Font)
 REG_ALIAS(Camera, Camera3D)
+REG_ALIAS(MOUSE_LEFT_BUTTON, MOUSE_BUTTON_LEFT)
+REG_ALIAS(MOUSE_RIGHT_BUTTON, MOUSE_BUTTON_RIGHT)
+REG_ALIAS(MOUSE_MIDDLE_BUTTON, MOUSE_BUTTON_MIDDLE)
 REG_ALIAS(MATERIAL_MAP_DIFFUSE, MATERIAL_MAP_ALBEDO)
 REG_ALIAS(MATERIAL_MAP_SPECULAR, MATERIAL_MAP_METALNESS)
 REG_ALIAS(SHADER_LOC_MAP_DIFFUSE, SHADER_LOC_MAP_ALBEDO)
@@ -326,7 +323,7 @@ REG_ALIAS(RL_MALLOC, _SWIGExtra_RL_MALLOC)
 REG_ALIAS(RL_CALLOC, _SWIGExtra_RL_CALLOC)
 REG_ALIAS(RL_REALLOC, _SWIGExtra_RL_REALLOC)
 REG_ALIAS(RL_FREE, _SWIGExtra_RL_FREE)
-REG_ALIAS(CodepointToUtf8, _SWIGExtra_CodepointToUtf8_WithNullTerm)
+REG_ALIAS(CodepointToUTF8, _SWIGExtra_CodepointToUTF8_WithNullTerm)
 REG_ALIAS(MatrixToFloat, _SWIGExtra_MatrixToFloat)
 REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
 
@@ -343,7 +340,7 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
         ["float"] = _swig.FloatArray_getitem,
         ["charP"] = _swig.CharPArray_getitem,
         ["Color"] = _swig.ColorArray_getitem,
-        ["CharInfo"] = _swig.CharInfoArray_getitem,
+        ["GlyphInfo"] = _swig.GlyphInfoArray_getitem,
         ["Rectangle"] = _swig.RectangleArray_getitem,
         ["Material"] = _swig.MaterialArray_getitem,
         ["ModelAnimation"] = _swig.ModelAnimationArray_getitem,
@@ -365,6 +362,7 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
             "Vector4",
             "Color",
             "Rectangle",
+            "Ray",
             "BoundingBox",
             "GetDirectoryFiles",
             "GetDroppedFiles",
@@ -376,7 +374,8 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
             "LoadFontData",
             "UnloadFontData",
             "GenImageFontAtlas",
-            "GetCodepoints",
+            "LoadCodepoints",
+            "UnloadCodepoints",
             "LoadMaterials",
             "LoadModelAnimations",
             "UnloadModelAnimations",
@@ -414,6 +413,12 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
         if w then rect.width, rect.height = w, h end
         return rect
     end
+    function _swig.Ray(position, direction)
+        local ray = _originals.Ray()
+        if position then ray.position = position end
+        if direction then ray.direction = direction end
+        return ray
+    end
     function _swig.BoundingBox(min, max)
         local box = _originals.BoundingBox()
         if min then box.min, box.max = min, max end
@@ -445,17 +450,21 @@ REG_ALIAS(Vector3ToFloat, _SWIGExtra_Vector3ToFloat)
     end
 
     function _swig.LoadFontData(fileData, dataSize, fontSize, fontChars, type)
-        return _CArrayToLuaTab("CharInfo", _originals._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
+        return _CArrayToLuaTab("GlyphInfo", _originals._SWIGExtra_LoadFontData_ArgRearrange(fileData, dataSize, fontSize, fontChars, type))
     end
-    function _swig.UnloadFontData(charInfos)
-        return _originals.UnloadFontData(charInfos[1], #charInfos)
+    function _swig.UnloadFontData(glyphInfos)
+        return _originals.UnloadFontData(glyphInfos[1], #glyphInfos)
     end
     function _swig.GenImageFontAtlas(chars, fontSize, padding, packMethod)
-        local image, recs, charsCount = _originals._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
-        return image, _CArrayToLuaTab("Rectangle", recs, charsCount)
+        local image, recs, glyphCount = _originals._SWIGExtra_GenImageFontAtlas_ArgRearrange(chars, fontSize, padding, packMethod)
+        return image, _CArrayToLuaTab("Rectangle", recs, glyphCount)
     end
-    function _swig.GetCodepoints(text)
-        return _CArrayToLuaTab("int", _originals.GetCodepoints(text))
+
+    function _swig.LoadCodepoints(text)
+        return _CArrayToLuaTab("int", _originals.LoadCodepoints(text))
+    end
+    function _swig.UnloadCodepoints(codepoints)
+        return _originals.UnloadCodepoints(codepoints, #codepoints)
     end
 
     function _swig.LoadMaterials(fileName)
