@@ -270,8 +270,8 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 
 #ifdef SWIGLUA
 %define REG_COLOR(colorName)
-    %inline %{ const Color _SWIGExtra_##colorName = colorName; %}
-    %luacode %{ _swig[#colorName] = _swig._SWIGExtra_##colorName %}
+    %inline %{ Color _SWIGExtra_get_##colorName(){ return colorName; } %}
+    %luacode %{ _swig[#colorName] = _swig._SWIGExtra_get_##colorName() %}
 %enddef
 %define REG_ALIAS(dest, source)
     %luacode %{ _swig[#dest] = _swig[#source] %}
