@@ -8,7 +8,7 @@ raylib.InitWindow(screenWidth, screenHeight, "raylib [core] example - basic wind
 raylib.SetTargetFPS(60)
 while not raylib.WindowShouldClose() do
     raylib.BeginDrawing()
-    raylib.ClearBackground(raylib.RAYWHITE);
+    raylib.ClearBackground(raylib.RAYWHITE)
     raylib.DrawText("Congrats! You created your first window!", 190, 200, 20, raylib.LIGHTGRAY)
     raylib.EndDrawing()
 end

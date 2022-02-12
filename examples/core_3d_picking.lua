@@ -17,7 +17,7 @@ local cubePosition = raylib.Vector3(0, 1, 0)
 local cubeSize = raylib.Vector3(2, 2, 2)
 
 local ray = raylib.Ray()
-local collision = false
+local collision = nil
 
 raylib.SetCameraMode(camera, raylib.CAMERA_FREE)
 raylib.SetTargetFPS(60)
@@ -26,14 +26,14 @@ while not raylib.WindowShouldClose() do
 
     raylib.UpdateCamera(camera)
     if raylib.IsMouseButtonPressed(raylib.MOUSE_LEFT_BUTTON) then
-        if not collision then
+        if not collision or not collision.hit then
             ray = raylib.GetMouseRay(raylib.GetMousePosition(), camera)
-            collision = raylib.CheckCollisionRayBox(ray, raylib.BoundingBox(
+            collision = raylib.GetRayCollisionBox(ray, raylib.BoundingBox(
                 raylib.Vector3(cubePosition.x - cubeSize.x/2, cubePosition.y - cubeSize.y/2, cubePosition.z - cubeSize.z/2),
                 raylib.Vector3(cubePosition.x + cubeSize.x/2, cubePosition.y + cubeSize.y/2, cubePosition.z + cubeSize.z/2)
             ))
         else
-            collision = false
+            collision.hit = false
         end
     end
 
@@ -41,7 +41,7 @@ while not raylib.WindowShouldClose() do
     raylib.ClearBackground(raylib.RAYWHITE)
 
     raylib.BeginMode3D(camera)
-    if collision then
+    if collision and collision.hit then
         raylib.DrawCube(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, raylib.RED)
         raylib.DrawCubeWires(cubePosition, cubeSize.x, cubeSize.y, cubeSize.z, raylib.MAROON)
         raylib.DrawCubeWires(cubePosition, cubeSize.x + 0.2, cubeSize.y + 0.2, cubeSize.z + 0.2, raylib.GREEN)
@@ -54,7 +54,7 @@ while not raylib.WindowShouldClose() do
     raylib.EndMode3D()
 
     raylib.DrawText("Try selecting the box with mouse!", 240, 10, 20, raylib.DARKGRAY)
-    if collision then
+    if collision and collision.hit then
         raylib.DrawText("BOX SELECTED", (screenWidth - raylib.MeasureText("BOX SELECTED", 30)) / 2, math.floor(screenHeight * 0.1), 30, raylib.GREEN)
     end
     raylib.DrawFPS(10, 10)

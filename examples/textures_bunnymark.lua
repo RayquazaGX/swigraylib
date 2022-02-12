@@ -15,7 +15,7 @@ local bunnies = {}
 raylib.SetTargetFPS(60)
 while not raylib.WindowShouldClose() do
     local bunny
-    if raylib.IsMouseButtonDown(raylib.MOUSE_LEFT_BUTTON) then
+    if raylib.IsMouseButtonDown(raylib.MOUSE_BUTTON_LEFT) then
         local mousePos = raylib.GetMousePosition()
         local rand = raylib.GetRandomValue
         local col = raylib.Color
@@ -33,11 +33,16 @@ while not raylib.WindowShouldClose() do
     do
         for i = 1, #bunnies do
             bunny = bunnies[i]
-            bunny.position.x, bunny.position.y = bunny.position.x + bunny.speed.x, bunny.position.y + bunny.speed.y
-            if (bunny.position.x + texBunny.width/2 > screenWidth) or (bunny.position.x + texBunny.width/2 < 0) then
+            bunny.position.x = bunny.position.x + bunny.speed.x
+            bunny.position.y = bunny.position.y + bunny.speed.y
+            if (bunny.position.x + texBunny.width/2 > screenWidth)
+                or (bunny.position.x + texBunny.width/2 < 0)
+            then
                 bunny.speed.x = -bunny.speed.x
             end
-            if (bunny.position.y + texBunny.height/2 > screenHeight) or (bunny.position.y + texBunny.height/2 - 40 < 0) then
+            if (bunny.position.y + texBunny.height/2 > screenHeight)
+                or (bunny.position.y + texBunny.height/2 - 40 < 0)
+            then
                 bunny.speed.y = -bunny.speed.y
             end
         end

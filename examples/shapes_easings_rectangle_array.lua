@@ -1,5 +1,6 @@
 -- Original: https://github.com/raysan5/raylib/blob/master/examples/shapes/shapes_easings_rectangle_array.c, by Ramon Santamaria (@raysan5)
 -- Translated to Lua, by 域外創音 <https://github.com/Rinkaa>
+-- This example uses `extra/easings.h`, make sure the header is including when compiling the bindings.
 
 local raylib = require "raylib"
 
