@@ -56,11 +56,6 @@
     #include "extras/physac.h"
 %}
 #endif
-#ifdef SWIGRAYLIB_USE_EASINGS
-%{
-    #include "extras/easings.h"
-%}
-#endif
 
 //------
 // General tags
@@ -134,7 +129,7 @@
 // %array_functions(Ray, RayArray)
 // %array_functions(RayCollision, RayCollisionArray)
 // %array_functions(BoundingBox, BoundingBoxArray)
-#ifdef SWIGRAYLIB_USE_PHYSAC
+#ifdef PHYSAC_IMPLEMENTATION
 %array_functions(PhysicsBodyData, PhysicsBodyDataArray)
 #endif
 
@@ -196,21 +191,27 @@ char *_SWIGExtra_CodepointToUTF8_WithNullTerm(int codepoint);
 %clear (Vector2 *points, int pointsCount), (Vector2 *texcoords, int texcoordsCount), (int *fontChars, int glyphCount), (int *codepoints, int length), (Vector3 *points, int pointsCount), (Matrix *transforms, int instances);
 
 //raymath.h
+#ifdef SWIGRAYLIB_EXPOSE_RAYMATH
 extern void Vector3OrthoNormalize(Vector3 *INOUT, Vector3 *INOUT);
 extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 %include "raymath.h"
+#endif // SWIGRAYLIB_EXPOSE_RAYMATH
 
-//other headers
-%include "rlgl.h" //Don't do typemaps to save C++ <-> script type conversions; use array functions in case you really need rlgl functions
+//rlgl.h
+#ifdef SWIGRAYLIB_EXPOSE_RLGL
+// Remember that interops between Lua and C via SWIG is somewhat costly;
+//   instead of using the solution here, you really should write C functions if you can!
+// If you must use Lua to call rlgl.h functions, you may want to use carray.i functions as well,
+//   which allow you to set up buffer memories for the arguments, to save interop counts.
+%include "rlgl.h"
+#endif // SWIGRAYLIB_EXPOSE_RLGL
+
 #ifdef TRACELOG //Fix "TRACELOG" redefined error in SWIG
 #undef TRACELOG
 #endif
-#ifdef SWIGRAYLIB_USE_PHYSAC
+#ifdef PHYSAC_IMPLEMENTATION
 %include "extras/physac.h"
-#endif
-#ifdef SWIGRAYLIB_USE_EASINGS
-%include "extras/easings.h"
-#endif
+#endif // PHYSAC_IMPLEMENTATION
 
 
 //------
@@ -251,7 +252,7 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
         utf8NullTerm[len] = '\0';
         return utf8NullTerm;
     };
-    //raymath.h
+    //raymath.h (Useful juices. No need to wrap these between conditional macros)
     float *_SWIGExtra_MatrixToFloat(Matrix mat){
         float* copy = (float*)malloc(16*sizeof(float));
         memcpy(copy, MatrixToFloat(mat), 16*sizeof(float));

@@ -5,32 +5,38 @@ set_languages("c11")
 
 option("language")
     set_showmenu(true)
-    set_category("swig_options/target_binding_language")
+    set_category("target_binding_language")
     set_default("lua")
     set_values("lua")
 option_end()
 
 option("lua_flavor")
     set_showmenu(true)
-    set_category("swig_options/lua_options/lua_flavor")
+    set_category("lua_options/lua_flavor")
     set_default("luajit")
     set_values("luajit", "lua5.1", "lua5.2", "lua5.3", "lua5.4")
 option_end()
 
-option("use_physac")
+option("expose_raymath")
     set_showmenu(true)
-    set_category("raylib_options/use_physac")
-    set_default(false)
+    set_category("expose_raymath")
+    set_default(true)
 option_end()
 
-option("use_easings")
+option("expose_rlgl")
     set_showmenu(true)
-    set_category("raylib_options/use_easings")
+    set_category("expose_rlgl")
+    set_default(true)
+option_end()
+
+option("use_and_expose_physac")
+    set_showmenu(true)
+    set_category("use_and_expose_physac")
     set_default(false)
 option_end()
 
 local luadep
-if is_config("language", "lua.*") then
+if is_config("language", "lua") then
     if is_config("lua_flavor", "luajit.*") then
         add_requires("luajit 2.1.0-beta3")
         luadep = function() add_packages("luajit") end
@@ -90,52 +96,50 @@ else
 end
 
 local swigflags = {"-Iraylib/src"}
-if has_config("use_physac") then
-    table.insert(raylibflags, "-DPHYSAC_IMPLEMENTATION")
-    table.insert(swigflags, "-DSWIGRAYLIB_USE_PHYSAC")
+if has_config("expose_raymath") then
+    table.insert(swigflags, "-DSWIGRAYLIB_EXPOSE_RAYMATH")
 end
-if has_config("use_easings") then
-    table.insert(swigflags, "-DSWIGRAYLIB_USE_EASINGS")
+if has_config("expose_rlgl") then
+    table.insert(swigflags, "-DSWIGRAYLIB_EXPOSE_RLGL")
+end
+if has_config("use_and_expose_physac") then
+    table.insert(raylibflags, "-DPHYSAC_IMPLEMENTATION")
 end
 table.join2(swigflags, raylibflags)
 
 target("swigraylib")
-    set_kind("phony")
+    set_kind("shared")
     set_default(true)
 
     before_build(function(target)
-        if not is_config("language", "lua.*") then
+        if not is_config("language", "lua") then
             cprint("${yellow underline}Bindings to the target language are not implemented! Doing nothing. Please point to a implemented target with `xmake f --language=xxx`. ${clear}")
         end
     end)
 
-    if is_config("language", "lua.*") then
-        add_deps("swigraylib_lua")
+    if is_config("language", "lua") then
+
+        if luadep then luadep() end
+        if raylibdep then raylibdep() end
+
+        add_includedirs("raylib/src")
+        add_includedirs("raylib/src/external/glfw/include")
+        add_files("raylib/src/*.c")
+
+        add_rules("swig")
+        table.insert(swigflags, "-no-old-metatable-bindings")
+        add_files("raylib.i", {
+            targetLang = "lua",
+            cppMode = false,
+            outDir = "gen/raylib.i/",
+            outName = "raylib.i.lua.$(os).c",
+            extra = swigflags
+        })
+
+        add_cxflags(table.unpack(raylibflags))
+        set_prefixname("")
+        set_basename("raylib")
+        set_suffixname("")
     end
-
-target_end()
-
-target("swigraylib_lua")
-    set_kind("shared")
-    set_default(false)
-
-    if luadep then luadep() end
-    if raylibdep then raylibdep() end
-
-    add_includedirs("raylib/src")
-    add_includedirs("raylib/src/external/glfw/include")
-    add_files("raylib/src/*.c")
-
-    add_rules("swig")
-    table.insert(swigflags, "-no-old-metatable-bindings")
-    add_files("raylib.i", {
-        targetLang = "lua",
-        cppMode = false,
-        outDir = "gen/raylib.i/",
-        outName = "raylib.i.lua.$(os).c",
-        extra = swigflags
-    })
-
-    add_cxflags(table.unpack(raylibflags))
 
 target_end()
