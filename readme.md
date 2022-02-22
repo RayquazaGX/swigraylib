@@ -32,14 +32,48 @@ This repo generates bindings for raylib to other languages (eg. Lua), by providi
 
 ## Build ##
 
-This provided build method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) installed.
+You can use `make` or `xmake` to build this project.
+
+### Using make ###
+```sh
+# This method requires `make` already installed,
+# and uses the binding files that come along inside the folder `gen/raylib.i/`.
+
+# Set the options first.
+# You may want to read the `Makefile` for more options. (not very well documented though...)
+EXPORT BUILD_MODE=[DEBUG|RELEASE]
+EXPORT SWIGRAYLIB_LIBTYPE=[SHARED|STATIC]
+# If the binding targets to lua, you also need to set the path of the lua library. Change the following paths accordingly.
+EXPORT LUA_LIB_NAME=[luajit|lua5.1|...]
+EXPORT LUA_LIB_PATH=/usr/lib/x86_64-linux-gnu
+EXPORT LUA_INCLUDE_PATH=/usr/include/lua5.1
+# Build.
+make
+
+## Clean the project without removing the binding files that come along.
+make cleanbuild
+
+## Clean the project with removing the binding files that come along.
+# (in order to renew the binding files using [`SWIG`](http://www.swig.org/download.html)).
+# If you had done this by mistake you could found the binding files back using git.
+make clean
+```
+
+### Using xmake ###
 
 ```sh
+# This method requires [`xmake`](https://github.com/xmake-io/xmake#installation) and [`SWIG`](http://www.swig.org/download.html) already installed.
+# The binding file is generated every time a build is triggered.
+
 # Config the project using a terminal ui, eg. Windows `cmd`.
 # You choose a target language and other options in the menu `Project Configuration`.
 xmake config --menu
+
 # Build with saved configs.
 xmake
+
+# Clean the project.
+xmake clean
 ```
 
 ## Examples ##
@@ -49,7 +83,7 @@ xmake
 > Print raylib version in the terminal:
 ```sh
 # Start luajit to test. You should change the path of the output library accordingly.
-luajit -i -e "package.cpath=package.cpath..';./build/linux/x86_64/release/swigraylib_lua.so'"
+luajit -i -e "package.cpath=package.cpath..';./libswigraylib.so'"
 > raylib = require "raylib"
 > print(raylib.RAYLIB_VERSION)
 4.0
