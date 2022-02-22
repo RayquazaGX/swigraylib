@@ -52,11 +52,34 @@ unexport LDFLAGS
 unexport LDLIBS
 
 ## Swigraylib options
+# The target language and the target OS correspond to the binding files provided from `gen/raylib.i/`
 SWIGRAYLIB_TARGET_LANG ?= lua
-SWIGRAYLIB_TARGET_OS   ?= windows
-# Requires SWIG
+ifeq ($(OS),Windows_NT)
+	SWIGRAYLIB_TARGET_OS ?= windows
+else
+	UNAMEOS=$(shell uname)
+	ifeq ($(UNAMEOS),Linux)
+		SWIGRAYLIB_TARGET_OS ?= linux
+	endif
+	ifeq ($(UNAMEOS),FreeBSD)
+		SWIGRAYLIB_TARGET_OS ?= freebsd
+	endif
+	ifeq ($(UNAMEOS),OpenBSD)
+		SWIGRAYLIB_TARGET_OS ?= openbsd
+	endif
+	ifeq ($(UNAMEOS),NetBSD)
+		SWIGRAYLIB_TARGET_OS ?= netbsd
+	endif
+	ifeq ($(UNAMEOS),DragonFly)
+		SWIGRAYLIB_TARGET_OS ?= dragonfly
+	endif
+	ifeq ($(UNAMEOS),Darwin)
+		SWIGRAYLIB_TARGET_OS ?= macosx
+	endif
+endif
+# The generator requires SWIG
 SWIGRAYLIB_BINDING_GENERATOR_OPTIONS_USE_DEFAULT ?= TRUE
-# Requires SWIG
+# The generator requires SWIG
 SWIGRAYLIB_BINDING_GENERATOR_OPTIONS ?=
 
 ## Lua library info
