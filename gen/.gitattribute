@@ -1,0 +1,2 @@
+# Mark these files as generated, so that they are not analyzed during the language detection from Github
+raylib.i/** linguist-generated

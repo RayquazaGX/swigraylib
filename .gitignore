@@ -1,4 +1,11 @@
-*_wrap.c
+# make
+raylib.i.c
+raylib.i.o
+*.lib
+*.dll
+*.a
+*.so
+
+# xmake
 build/
-gen/
 .xmake/
