@@ -45,6 +45,68 @@
     #define bool bool
 #endif
 
+#if defined(__EMSCRIPTEN__)
+%{
+    #include <emscripten/emscripten.h>
+%}
+//void emscripten_set_main_loop(em_callback_func func, int fps, int simulate_infinite_loop);
+%{
+    lua_State* _SWIGExtra__L_for_emscripten = NULL;
+    int _SWIGExtra__mainLoopRef = 0;
+    void _SWIGExtra__call_main_loop_for_emscripten(void){
+        if(lua_gettop(_SWIGExtra__L_for_emscripten) != 0){
+            lua_pushstring(_SWIGExtra__L_for_emscripten, "_SWIGExtra__call_main_loop_for_emscripten: Stack not empty!");
+            lua_error(_SWIGExtra__L_for_emscripten);
+        }
+        lua_rawgeti(_SWIGExtra__L_for_emscripten, LUA_REGISTRYINDEX, _SWIGExtra__mainLoopRef);
+        lua_call(_SWIGExtra__L_for_emscripten, 0, 0);
+    };
+    int _SWIGExtra_emscripten_set_main_loop(lua_State* L){
+        int n = lua_gettop(L);
+        if(n < 1){
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 1 needed!");
+            lua_error(L);
+        }
+        if(n > 3)
+            lua_pop(L, n-3);
+
+        int fps, simulate_infinite_loop;
+
+        if(lua_isnil(L, 3) || lua_isnone(L, 3)){
+            simulate_infinite_loop = 1;
+        }
+        else if(!lua_isnumber(L, 3))
+        {
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 3 not number!");
+            lua_error(L);
+        }
+        else{
+            simulate_infinite_loop = (int)lua_tonumber(L, 3);
+            lua_pop(L, 1);
+        }
+
+        if(lua_isnil(L, 2) || lua_isnone(L, 2)){
+            fps = 60;
+        }
+        else if(!lua_isnumber(L, 2)){
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 2 not number!");
+            lua_error(L);
+        }
+        else{
+            fps = (int)lua_tonumber(L, 2);
+            lua_pop(L, 1);
+        }
+
+        _SWIGExtra__L_for_emscripten = L;
+        _SWIGExtra__mainLoopRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+        emscripten_set_main_loop(_SWIGExtra__call_main_loop_for_emscripten, fps, simulate_infinite_loop);
+        return 0;
+    };
+%}
+%native(emscripten_set_main_loop) int _SWIGExtra_emscripten_set_main_loop(lua_State* L);
+#endif
+
 %{
     #include "config.h"
     #include "raylib.h"
@@ -277,6 +339,14 @@ extern void QuaternionToAxisAngle(Quaternion q, Vector3 *OUTPUT, float *OUTPUT);
 %define REG_ALIAS(dest, source)
     %luacode %{ _swig[#dest] = _swig[#source] %}
 %enddef
+%define REG_MACRO_OPTION(macroName)
+    #if defined(##macroName##)
+        %inline %{ const int _SWIGExtra_##macroName = 1; %}
+    #else
+        %inline %{ const int _SWIGExtra_##macroName = 0; %}
+    #endif
+    %luacode %{ _swig[#macroName] = _swig._SWIGExtra_##macroName %}
+%enddef
 #endif
 
 //colors
@@ -307,6 +377,11 @@ REG_COLOR(BLANK)
 REG_COLOR(MAGENTA)
 REG_COLOR(RAYWHITE)
 //macro and typedef aliases
+REG_MACRO_OPTION(PLATFORM_DESKTOP)
+REG_MACRO_OPTION(PLATFORM_ANDROID)
+REG_MACRO_OPTION(PLATFORM_RPI)
+REG_MACRO_OPTION(PLATFORM_DRM)
+REG_MACRO_OPTION(PLATFORM_WEB)
 REG_ALIAS(Quaternion, Vector4)
 REG_ALIAS(Texture2D, Texture)
 REG_ALIAS(TextureCubemap, Texture)

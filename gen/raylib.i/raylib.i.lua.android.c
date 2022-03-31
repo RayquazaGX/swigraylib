@@ -3363,6 +3363,11 @@ SWIGINTERN void SWIG_write_ptr_array(lua_State* L,void **array,int size,swig_typ
  Color _SWIGExtra_get_BLANK(){ return (Color){ 0, 0, 0, 0 }; } 
  Color _SWIGExtra_get_MAGENTA(){ return (Color){ 255, 0, 255, 255 }; } 
  Color _SWIGExtra_get_RAYWHITE(){ return (Color){ 245, 245, 245, 255 }; } 
+ const int _SWIGExtra_PLATFORM_DESKTOP = 0; 
+ const int _SWIGExtra_PLATFORM_ANDROID = 1; 
+ const int _SWIGExtra_PLATFORM_RPI = 0; 
+ const int _SWIGExtra_PLATFORM_DRM = 0; 
+ const int _SWIGExtra_PLATFORM_WEB = 0; 
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38878,7 +38883,97 @@ fail:
 }
 
 
+static int _wrap__SWIGExtra_PLATFORM_DESKTOP_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_DESKTOP",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_DESKTOP;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_ANDROID_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_ANDROID",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_ANDROID;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_RPI_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_RPI",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_RPI;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_DRM_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_DRM",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_DRM;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_WEB_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_WEB",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_WEB;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static swig_lua_attribute swig_SwigModule_attributes[] = {
+    { "_SWIGExtra_PLATFORM_DESKTOP", _wrap__SWIGExtra_PLATFORM_DESKTOP_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_ANDROID", _wrap__SWIGExtra_PLATFORM_ANDROID_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_RPI", _wrap__SWIGExtra_PLATFORM_RPI_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_DRM", _wrap__SWIGExtra_PLATFORM_DRM_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_WEB", _wrap__SWIGExtra_PLATFORM_WEB_get, SWIG_Lua_set_immutable },
     {0,0,0}
 };
 static swig_lua_const_info swig_SwigModule_constants[]= {
@@ -40976,6 +41071,11 @@ const char* SWIG_LUACODE=
   " _swig[\"BLANK\"] = _swig._SWIGExtra_get_BLANK() \n"
   " _swig[\"MAGENTA\"] = _swig._SWIGExtra_get_MAGENTA() \n"
   " _swig[\"RAYWHITE\"] = _swig._SWIGExtra_get_RAYWHITE() \n"
+  " _swig[\"PLATFORM_DESKTOP\"] = _swig._SWIGExtra_PLATFORM_DESKTOP \n"
+  " _swig[\"PLATFORM_ANDROID\"] = _swig._SWIGExtra_PLATFORM_ANDROID \n"
+  " _swig[\"PLATFORM_RPI\"] = _swig._SWIGExtra_PLATFORM_RPI \n"
+  " _swig[\"PLATFORM_DRM\"] = _swig._SWIGExtra_PLATFORM_DRM \n"
+  " _swig[\"PLATFORM_WEB\"] = _swig._SWIGExtra_PLATFORM_WEB \n"
   " _swig[\"Quaternion\"] = _swig[\"Vector4\"] \n"
   " _swig[\"Texture2D\"] = _swig[\"Texture\"] \n"
   " _swig[\"TextureCubemap\"] = _swig[\"Texture\"] \n"

@@ -2769,6 +2769,63 @@ static swig_module_info swig_module = {swig_types, 83, 0, 0, 0, 0};
 
 #define SWIG_LUACODE   luaopen_raylib_luacode
 
+    #include <emscripten/emscripten.h>
+
+
+    lua_State* _SWIGExtra__L_for_emscripten = NULL;
+    int _SWIGExtra__mainLoopRef = 0;
+    void _SWIGExtra__call_main_loop_for_emscripten(void){
+        if(lua_gettop(_SWIGExtra__L_for_emscripten) != 0){
+            lua_pushstring(_SWIGExtra__L_for_emscripten, "_SWIGExtra__call_main_loop_for_emscripten: Stack not empty!");
+            lua_error(_SWIGExtra__L_for_emscripten);
+        }
+        lua_rawgeti(_SWIGExtra__L_for_emscripten, LUA_REGISTRYINDEX, _SWIGExtra__mainLoopRef);
+        lua_call(_SWIGExtra__L_for_emscripten, 0, 0);
+    };
+    int _SWIGExtra_emscripten_set_main_loop(lua_State* L){
+        int n = lua_gettop(L);
+        if(n < 1){
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 1 needed!");
+            lua_error(L);
+        }
+        if(n > 3)
+            lua_pop(L, n-3);
+
+        int fps, simulate_infinite_loop;
+
+        if(lua_isnil(L, 3) || lua_isnone(L, 3)){
+            simulate_infinite_loop = 1;
+        }
+        else if(!lua_isnumber(L, 3))
+        {
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 3 not number!");
+            lua_error(L);
+        }
+        else{
+            simulate_infinite_loop = (int)lua_tonumber(L, 3);
+            lua_pop(L, 1);
+        }
+
+        if(lua_isnil(L, 2) || lua_isnone(L, 2)){
+            fps = 60;
+        }
+        else if(!lua_isnumber(L, 2)){
+            lua_pushstring(L, "_SWIGExtra_emscripten_set_main_loop: param 2 not number!");
+            lua_error(L);
+        }
+        else{
+            fps = (int)lua_tonumber(L, 2);
+            lua_pop(L, 1);
+        }
+
+        _SWIGExtra__L_for_emscripten = L;
+        _SWIGExtra__mainLoopRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
+        emscripten_set_main_loop(_SWIGExtra__call_main_loop_for_emscripten, fps, simulate_infinite_loop);
+        return 0;
+    };
+
+
     #include "config.h"
     #include "raylib.h"
     #include "raymath.h"
@@ -3363,6 +3420,11 @@ SWIGINTERN void SWIG_write_ptr_array(lua_State* L,void **array,int size,swig_typ
  Color _SWIGExtra_get_BLANK(){ return (Color){ 0, 0, 0, 0 }; } 
  Color _SWIGExtra_get_MAGENTA(){ return (Color){ 255, 0, 255, 255 }; } 
  Color _SWIGExtra_get_RAYWHITE(){ return (Color){ 245, 245, 245, 255 }; } 
+ const int _SWIGExtra_PLATFORM_DESKTOP = 0; 
+ const int _SWIGExtra_PLATFORM_ANDROID = 0; 
+ const int _SWIGExtra_PLATFORM_RPI = 0; 
+ const int _SWIGExtra_PLATFORM_DRM = 0; 
+ const int _SWIGExtra_PLATFORM_WEB = 1; 
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38878,7 +38940,97 @@ fail:
 }
 
 
+static int _wrap__SWIGExtra_PLATFORM_DESKTOP_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_DESKTOP",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_DESKTOP;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_ANDROID_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_ANDROID",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_ANDROID;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_RPI_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_RPI",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_RPI;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_DRM_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_DRM",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_DRM;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap__SWIGExtra_PLATFORM_WEB_get(lua_State* L) {
+  int SWIG_arg = 0;
+  int result;
+  
+  SWIG_check_num_args("_SWIGExtra_PLATFORM_WEB",0,0)
+  result = (int)(int)_SWIGExtra_PLATFORM_WEB;
+  lua_pushnumber(L, (lua_Number) result); SWIG_arg++;
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
 static swig_lua_attribute swig_SwigModule_attributes[] = {
+    { "_SWIGExtra_PLATFORM_DESKTOP", _wrap__SWIGExtra_PLATFORM_DESKTOP_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_ANDROID", _wrap__SWIGExtra_PLATFORM_ANDROID_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_RPI", _wrap__SWIGExtra_PLATFORM_RPI_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_DRM", _wrap__SWIGExtra_PLATFORM_DRM_get, SWIG_Lua_set_immutable },
+    { "_SWIGExtra_PLATFORM_WEB", _wrap__SWIGExtra_PLATFORM_WEB_get, SWIG_Lua_set_immutable },
     {0,0,0}
 };
 static swig_lua_const_info swig_SwigModule_constants[]= {
@@ -39391,6 +39543,7 @@ static swig_lua_const_info swig_SwigModule_constants[]= {
     {0,0,0,0,0,0}
 };
 static swig_lua_method swig_SwigModule_methods[]= {
+    { "emscripten_set_main_loop",_SWIGExtra_emscripten_set_main_loop},
     { "new_IntArray", _wrap_new_IntArray},
     { "delete_IntArray", _wrap_delete_IntArray},
     { "IntArray_getitem", _wrap_IntArray_getitem},
@@ -40976,6 +41129,11 @@ const char* SWIG_LUACODE=
   " _swig[\"BLANK\"] = _swig._SWIGExtra_get_BLANK() \n"
   " _swig[\"MAGENTA\"] = _swig._SWIGExtra_get_MAGENTA() \n"
   " _swig[\"RAYWHITE\"] = _swig._SWIGExtra_get_RAYWHITE() \n"
+  " _swig[\"PLATFORM_DESKTOP\"] = _swig._SWIGExtra_PLATFORM_DESKTOP \n"
+  " _swig[\"PLATFORM_ANDROID\"] = _swig._SWIGExtra_PLATFORM_ANDROID \n"
+  " _swig[\"PLATFORM_RPI\"] = _swig._SWIGExtra_PLATFORM_RPI \n"
+  " _swig[\"PLATFORM_DRM\"] = _swig._SWIGExtra_PLATFORM_DRM \n"
+  " _swig[\"PLATFORM_WEB\"] = _swig._SWIGExtra_PLATFORM_WEB \n"
   " _swig[\"Quaternion\"] = _swig[\"Vector4\"] \n"
   " _swig[\"Texture2D\"] = _swig[\"Texture\"] \n"
   " _swig[\"TextureCubemap\"] = _swig[\"Texture\"] \n"

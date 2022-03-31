@@ -29,6 +29,7 @@ This repo generates bindings for raylib to other languages (eg. Lua), by providi
     - `physac.h` (optional, off by default)
 - Supported languages:
     - [x] Lua (5.1 ~ 5.4, or LuaJIT)
+        - Version 5.1 or 5.2 needed if compile to wasm
 
 ## Build ##
 
@@ -83,7 +84,7 @@ xmake clean
 > Print raylib version in the terminal:
 ```sh
 # Start luajit to test. You should change the path of the output library accordingly.
-luajit -i -e "package.cpath=package.cpath..';./libswigraylib.so'"
+luajit -i -e "package.cpath=package.cpath..';./raylib.so'"
 > raylib = require "raylib"
 > print(raylib.RAYLIB_VERSION)
 4.0

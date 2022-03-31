@@ -38,14 +38,15 @@ end
 local function foreachOS(f, selections, args)
     local OSs = {
         windows = "-D_WIN32 -DPLATFORM_DESKTOP",
+        mingw = "-D_WIN32 -DPLATFORM_DESKTOP",
         linux = "-D__linux__ -DPLATFORM_DESKTOP -D_DEFAULT_SOURCE",
+        wasm = "-D__EMSCRIPTEN__ -DPLATFORM_WEB -D_DEFAULT_SOURCE -D_GLFW_OSMESA",
         macosx = "-D__APPLE__ -DPLATFORM_DESKTOP", -- Untested
         freebsd = "-D__FreeBSD__ -DPLATFORM_DESKTOP -D_DEFAULT_SOURCE", -- Untested
         openbsd = "-D__OpenBSD__ -DPLATFORM_DESKTOP -D_DEFAULT_SOURCE", -- Untested
         netbsd = "-D__NetBSD__ -DPLATFORM_DESKTOP -D_DEFAULT_SOURCE", -- Untested
         dragonfly = "-D__DragonFly__ -DPLATFORM_DESKTOP -D_DEFAULT_SOURCE", -- Untested
         android = "-D__ANDROID__ -DANDROID -DPLATFORM_ANDROID -D_DEFAULT_SOURCE", -- Untested
-        wasm = "-D__EMSCRIPTEN__ -DPLATFORM_WEB -D_DEFAULT_SOURCE", -- Untested
         iphoneos = "-D__APPLE__ -DPLATFORM_DESKTOP -DTARGET_OS_IOS", -- Untested, not officially supported by raylib
     }
     for k, v in pairs(OSs) do
