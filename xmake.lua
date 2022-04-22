@@ -13,7 +13,7 @@ option_end()
 option("lua_flavor")
     set_showmenu(true)
     set_category("lua_options/lua_flavor")
-    set_default("luajit")
+    set_default("lua5.1")
     set_values("luajit", "lua5.1", "lua5.2", "lua5.3", "lua5.4")
 option_end()
 
@@ -35,22 +35,28 @@ option("use_and_expose_physac")
     set_default(false)
 option_end()
 
+local useSystemLua
 local luadep
+if is_plat("wasm") then
+    useSystemLua = false
+else
+    useSystemLua = nil
+end
 if is_config("language", "lua") then
     if is_config("lua_flavor", "luajit.*") then
-        add_requires("luajit 2.1.0-beta3", {system = is_plat("wasm") or nil})
+        add_requires("luajit 2.1.0-beta3", {system = useSystemLua})
         luadep = function() add_packages("luajit") end
     elseif is_config("lua_flavor", "lua5%.1.*") then
-        add_requires("lua 5.1", {system = is_plat("wasm") or nil})
+        add_requires("lua 5.1", {system = useSystemLua})
         luadep = function() add_packages("lua") end
     elseif is_config("lua_flavor", "lua5%.2.*") then
-        add_requires("lua 5.2", {system = is_plat("wasm") or nil})
+        add_requires("lua 5.2", {system = useSystemLua})
         luadep = function() add_packages("lua") end
     elseif is_config("lua_flavor", "lua5%.3.*") then
-        add_requires("lua 5.3", {system = is_plat("wasm") or nil})
+        add_requires("lua 5.3", {system = useSystemLua})
         luadep = function() add_packages("lua") end
     elseif is_config("lua_flavor", "lua5%.4.*") then
-        add_requires("lua 5.4", {system = is_plat("wasm") or nil})
+        add_requires("lua 5.4", {system = useSystemLua})
         luadep = function() add_packages("lua") end
     end
 end
@@ -116,6 +122,14 @@ local function core(useExternalGlfw, swigTargetLang)
 
     if raylibdep then raylibdep() end
 
+    if is_mode("release") then
+        add_cxflags(is_plat("wasm") and "-Os" or "-O3")
+    elseif is_mode("debug") then
+        add_cxflags("-Og")
+        add_cxflags("-pg")
+        add_ldflags("-pg")
+    end
+
     add_includedirs("raylib/src")
     add_files(
         "raylib/src/rcore.c",
@@ -168,7 +182,6 @@ target("swigraylib")
         add_ldflags("-static-libstdc++", "-static-libgcc")
     elseif is_plat("wasm") then
         useExternalGlfw = true
-        add_cxflags("-Os")
         add_ldflags("-s USE_GLFW=3")
     end
     core(useExternalGlfw, swigTargetLang)
